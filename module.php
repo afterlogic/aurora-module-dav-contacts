@@ -4,13 +4,17 @@ class DavContactsModule extends AApiModule
 {
 	public $oApiContactsManager = null;
 
+	protected $aRequireModules = array(
+		'Contacts'
+	);
+
 	public function init() 
 	{
-		$this->oApiContactsManager = $this->GetManager();
+		$this->oApiContactsManager = $this->GetManager('');
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
-		$this->subscribeEvent('Contacts::DeleteContact::after', array($this, 'onAfterDeleteContact'));
+		$this->subscribeEvent('Contacts::DeleteContacts::after', array($this, 'onAfterDeleteContacts'));
 
 		$this->subscribeEvent('Contacts::CreateGroup::after', array($this, 'onAfterCreateGroup'));
 		$this->subscribeEvent('Contacts::UpdateGroup::after', array($this, 'onAfterUpdateGroup'));
@@ -27,6 +31,18 @@ class DavContactsModule extends AApiModule
 	public function onAfterCreateContact(&$aArgs, &$aResult)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		$sUUID = isset($aResult) ? $aResult : false;
+		if ($sUUID)
+		{
+			$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($sUUID);
+			if ($oContact instanceof \CContact)
+			{
+				if (!$this->oApiContactsManager->createContact($oContact))
+				{
+					$aResult = false;
+				}
+			}
+		}
 	}	
 	
 	/**
@@ -36,6 +52,18 @@ class DavContactsModule extends AApiModule
 	public function onAfterUpdateContact(&$aArgs, &$aResult)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
+		if($aResult && is_array($aArgs['Contact']) && isset($aArgs['Contact']['UUID']))
+		{
+			$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($aArgs['Contact']['UUID']);
+			if ($oContact instanceof \CContact)
+			{
+				if (!$this->oApiContactsManager->updateContact($oContact))
+				{
+					$aResult = false;
+				}
+			}			
+		}
 	}
 	
 	/**
@@ -45,6 +73,18 @@ class DavContactsModule extends AApiModule
 	public function onAfterDeleteContacts(&$aArgs, &$aResult)
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+
+		if ($aResult)
+		{
+			if (!$this->oApiContactsManager->deleteContacts(
+				\CApi::getAuthenticatedUserId(),
+				$aArgs['ContactUUIDs'])
+			)
+			{
+				$aResult = false;
+			}
+		}
+		
 	}	
 	
 	/**

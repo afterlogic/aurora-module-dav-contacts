@@ -807,7 +807,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		
 		$sAddressBook = $oContact->Storage === 'shared' ? \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME : \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
 		$oAddressBookFrom = $this->getAddressBook($oContact->IdUser, $sAddressBook);
-		$oContactItem = $this->geItem($oContact->IdUser, $oAddressBookFrom, $oContact->IdContactStr);
+		$oContactItem = $this->geItem($oContact->IdUser, $oAddressBookFrom, $oContact->sUUID . '.vcf');
 		if ($oContactItem)
 		{
 			$oAddressBookTo = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
@@ -817,7 +817,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 				{
 					$sData = $oContactItem->get();
 					$oContactItem->delete();
-					$oAddressBookTo->createFile($oContact->IdContactStr, $sData);
+					$oAddressBookTo->createFile($oContact->sUUID . '.vcf', $sData);
 					$bResult = true;
 				}
 				catch (Exception $ex)
@@ -839,7 +839,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		$bResult = false;
 		$iUserId = $oContact->IdUser;
 		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-		$oContactItem = $this->geItem($iUserId, $oAddressBook, $oContact->IdContactStr);
+		$oContactItem = $this->geItem($iUserId, $oAddressBook, $oContact->sUUID . '.vcf');
 		if ($oContactItem)
 		{
 			$sData = $oContactItem->get();
@@ -979,23 +979,24 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
 			if ($oAddressBook)
 			{
-				$sUUID = \Sabre\DAV\UUIDUtil::getUUID();
-				if (empty($oContact->IdContactStr))
-				{
-					$oContact->IdContactStr = $sUUID. '.vcf';
-				}
+				$oContact->sUUID .= '.vcf';
 
 				$oVCard = new \Sabre\VObject\Component\VCard();
 				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
 
-				$oAddressBook->createFile($oContact->IdContactStr, $oVCard->serialize());
+				$oAddressBook->createFile($oContact->sUUID, $oVCard->serialize());
 				$bResult = true;
 			}
-
+/*
+ *  for collected addressbook
+ * 
+ * 
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME);
 			$aContactIds = $this->searchContactItemsByEmail($oContact->IdUser, $oContact->ViewEmail, $oAddressBook);
 
 			$this->deleteContactsByAddressBook($oContact->IdUser, $aContactIds, $oAddressBook);
+ * 
+ */
 		}
 
 		return $bResult;
@@ -1162,7 +1163,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 					$oContact = new CContact();
 					$oContact->FullName = $sName;
 					$oContact->PersonalEmail = $sEmail;
-					$oContact->IdContactStr = $sUUID;
+					$oContact->sUUID = $sUUID;
 
 					$oVCard = new \Sabre\VObject\Component\VCard();
 					$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';

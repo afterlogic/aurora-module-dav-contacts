@@ -18,7 +18,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 	 */
 	public function __construct(CApiGlobalManager &$oManager, $sForcedStorage = '', AApiModule $oModule = null)
 	{
-		parent::__construct('', $oManager, $sForcedStorage, $oModule);
+		parent::__construct('', $oManager, 'sabredav', $oModule);
 	}
 
 	/**
