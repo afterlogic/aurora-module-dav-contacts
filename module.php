@@ -78,7 +78,7 @@ class DavContactsModule extends AApiModule
 		{
 			if (!$this->oApiContactsManager->deleteContacts(
 				\CApi::getAuthenticatedUserId(),
-				$aArgs['ContactUUIDs'])
+				$aArgs['UUIDs'])
 			)
 			{
 				$aResult = false;
