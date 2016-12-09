@@ -1025,6 +1025,10 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		{
 			foreach($aContactIds as $sContactId)
 			{
+				if (!strripos($sContactId, '.vcf'))
+				{
+					$sContactId .= '.vcf';
+				}
 				if ($oAddressBook->childExists($sContactId))
 				{
 					$oContact = $oAddressBook->GetChild($sContactId);

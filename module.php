@@ -10,7 +10,7 @@ class DavContactsModule extends AApiModule
 
 	public function init() 
 	{
-		$this->oApiContactsManager = $this->GetManager('');
+		$this->oApiContactsManager = $this->GetManager();
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
@@ -74,7 +74,7 @@ class DavContactsModule extends AApiModule
 	{
 		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
-		if ($aResult)
+		if ($aResult && isset($aArgs['UUIDs']))
 		{
 			if (!$this->oApiContactsManager->deleteContacts(
 				\CApi::getAuthenticatedUserId(),
