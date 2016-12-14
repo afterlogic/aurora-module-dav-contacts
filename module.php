@@ -12,6 +12,9 @@ class DavContactsModule extends AApiModule
 	{
 		$this->oApiContactsManager = $this->GetManager();
 		
+		$this->subscribeEvent('Contacts::GetImportExportFormats', array($this, 'onGetImportExportFormats'));
+		$this->subscribeEvent('Contacts::GetExportOutput', array($this, 'onGetExportOutput'));
+		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
 		$this->subscribeEvent('Contacts::DeleteContacts::after', array($this, 'onAfterDeleteContacts'));
@@ -24,6 +27,26 @@ class DavContactsModule extends AApiModule
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 	}
 
+	public function onGetImportExportFormats(&$aFormats)
+	{
+		$aFormats[] = 'vcf';
+	}
+	
+	public function onGetExportOutput($aArgs, &$sOutput)
+	{
+		if ($aArgs['Format'] === 'vcf')
+		{
+            $sOutput = '';
+			if (is_array($aArgs['Contacts']))
+			{
+				foreach ($aArgs['Contacts'] as $oContact)
+				{
+					$sOutput .= \Sabre\VObject\Reader::read($oContact->get())->serialize();
+				}
+			}
+		}
+	}
+	
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
