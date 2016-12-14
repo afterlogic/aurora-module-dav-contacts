@@ -14,6 +14,7 @@ class DavContactsModule extends AApiModule
 		
 		$this->subscribeEvent('Contacts::GetImportExportFormats', array($this, 'onGetImportExportFormats'));
 		$this->subscribeEvent('Contacts::GetExportOutput', array($this, 'onGetExportOutput'));
+		$this->subscribeEvent('Contacts::Import', array($this, 'onImport'));
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
@@ -42,6 +43,44 @@ class DavContactsModule extends AApiModule
 				foreach ($aArgs['Contacts'] as $oContact)
 				{
 					$sOutput .= \Sabre\VObject\Reader::read($oContact->get())->serialize();
+				}
+			}
+		}
+	}
+	
+	public function onImport($aArgs, &$iParsedCount)
+	{
+		if ($aArgs['Format'] === 'vcf')
+		{
+			$iParsedCount = 0;
+			// You can either pass a readable stream, or a string.
+			$oHandler = fopen($aArgs['TempFileName'], 'r');
+			$oSplitter = new \Sabre\VObject\Splitter\VCard($oHandler);
+			$oContactsDecorator = \CApi::GetModuleDecorator('Contacts');
+			$oApiContactsManager = $oContactsDecorator ? $oContactsDecorator->GetApiContactsManager() : null;
+			if ($oApiContactsManager)
+			{
+				while ($oVCard = $oSplitter->getNext())
+				{
+					$sUUID = (isset($oVCardObject->UID)) ? (string)$oVCardObject->UID : \Sabre\VObject\UUIDUtil::getUUID();
+					$oContact = $oApiContactsManager->getContact($sUUID);
+					if (!isset($oContact) || empty($oContact))
+					{
+						$oContact = \CContact::createInstance();
+						
+						$oContact->IdTenant = $aArgs['User']->IdTenant;
+						$oContact->sUUID = $sUUID;
+						$oContact->Storage = 'personal';
+
+						$oContact->InitFromVCardObject($aArgs['User']->iId, $oVCard);
+						
+						$oContact->SetViewEmail();
+
+						if ($oApiContactsManager->createContact($oContact))
+						{
+							$iParsedCount++;
+						}
+					}
 				}
 			}
 		}
