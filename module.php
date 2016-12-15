@@ -10,6 +10,8 @@ class DavContactsModule extends AApiModule
 
 	public function init() 
 	{
+		$this->incClass('vcard-helper');
+		
 		$this->oApiContactsManager = $this->GetManager();
 		
 		$this->subscribeEvent('Contacts::GetImportExportFormats', array($this, 'onGetImportExportFormats'));
@@ -42,7 +44,9 @@ class DavContactsModule extends AApiModule
 			{
 				foreach ($aArgs['Contacts'] as $oContact)
 				{
-					$sOutput .= \Sabre\VObject\Reader::read($oContact->get())->serialize();
+					$oVCard = new \Sabre\VObject\Component\VCard();
+					CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+					$sOutput .= $oVCard->serialize();
 				}
 			}
 		}
