@@ -62,14 +62,17 @@ class DavContactsModule extends AApiModule
 			{
 				while ($oVCard = $oSplitter->getNext())
 				{
-					$sUUID = (isset($oVCardObject->UID)) ? (string)$oVCardObject->UID : \Sabre\VObject\UUIDUtil::getUUID();
-					$oContact = $oApiContactsManager->getContact($sUUID);
+					$sUUID = (isset($oVCard->UID)) ? (string)$oVCard->UID : '';
+					$oContact = !empty($sUUID) ? $oApiContactsManager->getContact($sUUID) : null;
 					if (!isset($oContact) || empty($oContact))
 					{
 						$oContact = \CContact::createInstance();
 						
 						$oContact->IdTenant = $aArgs['User']->IdTenant;
-						$oContact->sUUID = $sUUID;
+						if (!empty($sUUID))
+						{
+							$oContact->sUUID = $sUUID;
+						}
 						$oContact->Storage = 'personal';
 
 						$oContact->InitFromVCardObject($aArgs['User']->iId, $oVCard);
