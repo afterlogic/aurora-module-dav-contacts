@@ -127,9 +127,20 @@ class DavContactsModule extends AApiModule
 			$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($aArgs['Contact']['UUID']);
 			if ($oContact instanceof \CContact)
 			{
-				if (!$this->oApiContactsManager->updateContact($oContact))
+				$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->sUUID.'.vcf');
+				if ($oDavContact)
 				{
-					$aResult = false;
+					if (!$this->oApiContactsManager->updateContact($oContact))
+					{
+						$aResult = false;
+					}
+				}
+				else
+				{
+					if (!$this->oApiContactsManager->createContact($oContact))
+					{
+						$aResult = false;
+					}
 				}
 			}			
 		}
