@@ -9,6 +9,209 @@
  */
 class CApiContactsVCardHelper
 {
+	
+	public static function GetContactDataFromVcard($oVCard)
+	{
+		$aContact = [];
+		
+		if (isset($oVCard->UID))
+		{
+			$aContact['UUID'] = (string) $oVCard->UID;
+		}
+
+		if (isset($oVCard->CATEGORIES))
+		{
+			$aGroupNames = $oVCard->CATEGORIES->getParts();
+			if (is_array($aGroupNames) && count($aGroupNames) > 0)
+			{
+				$aContact['GroupNames'] = $aGroupNames;
+			}
+		}
+
+		$aContact['FullName'] = isset($oVCard->FN) ? (string) $oVCard->FN : '';
+
+		if (isset($oVCard->N))
+		{
+			$aNames = $oVCard->N->getParts();
+			if (count($aNames) >= 2)
+			{
+				$aContact['LastName'] = !empty($aNames[0]) ? (string) $aNames[0] : '';
+				$aContact['FirstName'] = !empty($aNames[1]) ? (string) $aNames[1] : '';
+			}
+		}
+
+		$aContact['NickName'] = isset($oVCard->NICKNAME) ? (string) $oVCard->NICKNAME : '';
+		$aContact['Notes'] = isset($oVCard->NOTE) ? (string) $oVCard->NOTE : '';
+
+		if (isset($oVCard->BDAY))
+		{
+			$aDateTime = explode('T', (string) $oVCard->BDAY);
+			if (isset($aDateTime[0]))
+			{
+				$aDate = explode('-', $aDateTime[0]);
+				if (count($aDate) >= 3)
+				{
+					$aContact['BirthYear'] = (int) $aDate[0];
+					$aContact['BirthMonth'] = (int) $aDate[1];
+					$aContact['BirthDay'] = (int) $aDate[2];
+				}
+			}
+		}
+
+		if (isset($oVCard->ORG))
+		{
+			$aOrgs = $oVCard->ORG->getParts();
+
+			if (count($aOrgs) >= 2)
+			{
+				$aContact['BusinessCompany'] = !empty($aOrgs[0]) ? (string) $aOrgs[0] : '';
+				$aContact['BusinessDepartment'] = !empty($aOrgs[1]) ? (string) $aOrgs[1] : '';
+			}
+		}
+
+		$aContact['BusinessJobTitle'] = isset($oVCard->TITLE) ? (string) $oVCard->TITLE : '';
+
+		if (isset($oVCard->ADR))
+		{
+			foreach($oVCard->ADR as $oAdr)
+			{
+				$aAdrs = $oAdr->getParts();
+				$oTypes = $oAdr['TYPE'];
+				if ($oTypes)
+				{
+					if ($oTypes->has('WORK'))
+					{
+						$aContact['BusinessAddress'] = isset($aAdrs[2]) ? (string) $aAdrs[2] : '';
+						$aContact['BusinessCity'] = isset($aAdrs[3]) ? (string) $aAdrs[3] : '';
+						$aContact['BusinessState'] = isset($aAdrs[4]) ? (string) $aAdrs[4] : '';
+						$aContact['BusinessZip'] = isset($aAdrs[5]) ? (string) $aAdrs[5] : '';
+						$aContact['BusinessCountry'] = isset($aAdrs[6]) ? (string) $aAdrs[6] : '';
+					}
+					if ($oTypes->has('HOME'))
+					{
+						$aContact['PersonalAddress'] = isset($aAdrs[2]) ? (string) $aAdrs[2] : '';
+						$aContact['PersonalCity'] = isset($aAdrs[3]) ? (string) $aAdrs[3] : '';
+						$aContact['PersonalState'] = isset($aAdrs[4]) ? (string) $aAdrs[4] : '';
+						$aContact['PersonalZip'] = isset($aAdrs[5]) ? (string) $aAdrs[5] : '';
+						$aContact['PersonalCountry'] = isset($aAdrs[6]) ? (string) $aAdrs[6] : '';
+					}
+				}
+			}
+		}
+
+		if (isset($oVCard->EMAIL))
+		{
+			foreach($oVCard->EMAIL as $oEmail)
+			{
+				$oType = $oEmail['TYPE'];
+				if ($oType)
+				{
+					if ($oType->has('WORK') || $oType->has('INTERNET'))
+					{
+						$aContact['BusinessEmail'] = (string) $oEmail;
+						if ($oType->has('PREF'))
+						{
+							$aContact['PrimaryEmail'] = EContactsPrimaryEmail::Business;
+						}
+					}
+					else if ($oType->has('HOME'))
+					{
+						$aContact['PersonalEmail'] = (string) $oEmail;
+						if ($oType->has('PREF'))
+						{
+							$aContact['PrimaryEmail'] = EContactsPrimaryEmail::Personal;
+						}
+					}
+					else if ($oType->has('OTHER'))
+					{
+						$aContact['OtherEmail'] = (string) $oEmail;
+						if ($oType->has('PREF'))
+						{
+							$aContact['PrimaryEmail'] = EContactsPrimaryEmail::Other;
+						}
+					}
+					else if ($oEmail->group && isset($oVCard->{$oEmail->group.'.X-ABLABEL'}) &&
+						strtolower((string) $oVCard->{$oEmail->group.'.X-ABLABEL'}) === '_$!<other>!$_')
+					{
+						$aContact['OtherEmail'] = (string) $oEmail;
+						if ($oType->has('PREF'))
+						{
+							$aContact['PrimaryEmail'] = EContactsPrimaryEmail::Other;
+						}
+					}
+				}
+			}
+		}
+
+		if (isset($oVCard->URL))
+		{
+			foreach($oVCard->URL as $oUrl)
+			{
+				$oTypes = $oUrl['TYPE'];
+				if ($oTypes)
+				{
+					if ($oTypes->has('HOME'))
+					{
+						$aContact['PersonalWeb'] = (string) $oUrl;
+					}
+					else if ($oTypes->has('WORK'))
+					{
+						$aContact['BusinessWeb'] = (string) $oUrl;
+					}
+				}
+			}
+		}
+
+		if (isset($oVCard->TEL))
+		{
+			foreach($oVCard->TEL as $oTel)
+			{
+				$oTypes = $oTel['TYPE'];
+				if ($oTypes)
+				{
+					if ($oTypes->has('FAX'))
+					{
+						if ($oTypes->has('HOME'))
+						{
+							$aContact['PersonalFax'] = (string) $oTel;
+						}
+						if ($oTypes->has('WORK'))
+						{
+							$aContact['BusinessFax'] = (string) $oTel;
+						}
+					}
+					else
+					{
+						if ($oTypes->has('CELL'))
+						{
+							$aContact['PersonalMobile'] = (string) $oTel;
+						}
+						else if ($oTypes->has('HOME'))
+						{
+							$aContact['PersonalPhone'] = (string) $oTel;
+						}
+						else if ($oTypes->has('WORK'))
+						{
+							$aContact['BusinessPhone'] = (string) $oTel;
+						}
+					}
+				}
+			}
+		}
+
+		if (isset($oVCard->{'X-AFTERLOGIC-OFFICE'}))
+		{
+			$aContact['BusinessOffice'] = (string) $oVCard->{'X-AFTERLOGIC-OFFICE'};
+		}
+
+		if (isset($oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'}))
+		{
+			$aContact['UseFriendlyName'] = '1' === (string) $oVCard->{'X-AFTERLOGIC-USE-FRIENDLY-NAME'};
+		}
+		
+		return $aContact;
+	}
+	
 	/**
 	* @param CContact $oContact
 	* @param \Sabre\VObject\Component $oVCard
