@@ -145,7 +145,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 				$sVCardData = $oContactItem->get();
 				if ($sVCardData)
 				{
-					$oContact = new CContact();
+					$oContact = CContact::createInstance();
 					$oContact->InitFromVCardStr($iUserId, $sVCardData);
 					$oContact->IdContact = $mContactId;
 					$oContact->ETag = trim($oContactItem->getETag(), '"');
@@ -1180,7 +1180,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 				if ($mFindContact === false)
 				{
 					$sUUID = \Sabre\DAV\UUIDUtil::getUUID();
-					$oContact = new CContact();
+					$oContact = CContact::createInstance();
 					$oContact->FullName = $sName;
 					$oContact->PersonalEmail = $sEmail;
 					$oContact->sUUID = $sUUID;

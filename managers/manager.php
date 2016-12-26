@@ -38,46 +38,19 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 	}
 
 	/**
-	 * @return CContactListItem
-	 */
-//	public function createContactListItemObject()
-//	{
-//		return new CContactListItem();
-//	}
-
-	/**
-	 * @return CContact
-	 */
-//	public function createContactObject()
-//	{
-//		return new CContact();
-//	}
-
-	/**
-	 * @return CGroup
-	 */
-//	public function createGroupObject()
-//	{
-//		return new CGroup();
-//	}
-
-	/**
      * Returns contact item identified by user ID and contact ID.
      *
 	 * @param int $iUserId
 	 * @param mixed $mContactId
-	 * @param bool $bIgnoreHideInGab. Default value is **false**
-	 * @param int $iSharedTenantId. Default value is **null**
-	 * @param bool $bIgnoreAutoCreate Default value is **false**
      *
 	 * @return CContact|bool
 	 */
-	public function getContactById($iUserId, $mContactId, $bIgnoreHideInGab = false, $iSharedTenantId = null, $bIgnoreAutoCreate = false)
+	public function getContactById($iUserId, $mContactId)
 	{
 		$oContact = null;
 		try
 		{
-			$oContact = $this->oStorage->getContactById($iUserId, $mContactId, $bIgnoreHideInGab, $iSharedTenantId, $bIgnoreAutoCreate);
+			$oContact = $this->oStorage->getContactById($iUserId, $mContactId);
 			if ($oContact)
 			{
 				$mGroupIds = $this->getContactGroupIds($oContact);

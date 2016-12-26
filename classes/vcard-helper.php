@@ -26,11 +26,15 @@
 class CApiContactsVCardHelper
 {
 	
-	public static function GetContactDataFromVcard($oVCard)
+	public static function GetContactDataFromVcard($oVCard, $sUUID = '')
 	{
 		$aContact = [];
 		
-		if (isset($oVCard->UID))
+		if (!empty($sUUID))
+		{
+			$aContact['UUID'] = (string) $sUUID;
+		}
+		elseif (isset($oVCard->UID))
 		{
 			$aContact['UUID'] = (string) $oVCard->UID;
 		}

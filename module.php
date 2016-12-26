@@ -7,6 +7,9 @@ class DavContactsModule extends AApiModule
 	protected $aRequireModules = array(
 		'Contacts'
 	);
+	
+	protected $__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
+	protected $__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 
 	public function init() 
 	{
@@ -29,6 +32,47 @@ class DavContactsModule extends AApiModule
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 	}
+	
+	/**
+	 * 
+	 * @param int $iUserId
+	 * @param string $VCard
+	 * @return bool|string
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
+	public function CreateContact($UserId, $VCard, $UUID)
+	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
+		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
+		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
+		
+		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
+		$mResult = \CApi::GetModuleDecorator('Contacts')->CreateContact($aContactData, $UserId);
+		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
+		
+		return $mResult;
+	}	
+	
+	/**
+	 * 
+	 * @param string $VCard
+	 * @return bool|string
+	 * @throws \System\Exceptions\AuroraApiException
+	 */
+	public function UpdateContact($VCard, $UUID)
+	{
+		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		
+		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
+		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
+		
+		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
+		$mResult = \CApi::GetModuleDecorator('Contacts')->UpdateContact($aContactData);
+		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
+		
+		return $mResult;
+	}	
 
 	public function onGetImportExportFormats(&$aFormats)
 	{
@@ -88,16 +132,19 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterCreateContact(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		$sUUID = isset($aResult) ? $aResult : false;
-		if ($sUUID)
+		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
 		{
-			$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($sUUID);
-			if ($oContact instanceof \CContact)
+			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+			$sUUID = isset($aResult) ? $aResult : false;
+			if ($sUUID)
 			{
-				if (!$this->oApiContactsManager->createContact($oContact))
+				$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($sUUID);
+				if ($oContact instanceof \CContact)
 				{
-					$aResult = false;
+					if (!$this->oApiContactsManager->createContact($oContact))
+					{
+						$aResult = false;
+					}
 				}
 			}
 		}
@@ -109,29 +156,32 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterUpdateContact(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
-		
-		if($aResult && is_array($aArgs['Contact']) && isset($aArgs['Contact']['UUID']))
+		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
 		{
-			$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($aArgs['Contact']['UUID']);
-			if ($oContact instanceof \CContact)
+			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+
+			if($aResult && is_array($aArgs['Contact']) && isset($aArgs['Contact']['UUID']))
 			{
-				$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->sUUID.'.vcf');
-				if ($oDavContact)
+				$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($aArgs['Contact']['UUID']);
+				if ($oContact instanceof \CContact)
 				{
-					if (!$this->oApiContactsManager->updateContact($oContact))
+					$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->sUUID.'.vcf');
+					if ($oDavContact)
 					{
-						$aResult = false;
+						if (!$this->oApiContactsManager->updateContact($oContact))
+						{
+							$aResult = false;
+						}
 					}
-				}
-				else
-				{
-					if (!$this->oApiContactsManager->createContact($oContact))
+					else
 					{
-						$aResult = false;
+						if (!$this->oApiContactsManager->createContact($oContact))
+						{
+							$aResult = false;
+						}
 					}
-				}
-			}			
+				}			
+			}
 		}
 	}
 	
