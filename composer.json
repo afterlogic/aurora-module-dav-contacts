@@ -4,7 +4,7 @@
 	"require":{
 		"php":">=5.4.0",
 		"afterlogic/aurora-framework": "~0.1",
-		"afterlogic/aurora-module-dav": "~0.3",
+		"afterlogic/aurora-module-dav": "~0.3 || dev-master",
 		"afterlogic/dav": "^2.0.5",
 		"sabre/dav": "3.0.*"
 	},
