@@ -1,4 +1,6 @@
 {
-    "ContactsPerPage": 20,
-    "ImportContactsLink": ""
+	"Disabled": [
+		false,
+		"bool"
+	]
 }
