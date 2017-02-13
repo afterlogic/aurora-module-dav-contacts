@@ -675,7 +675,7 @@ class CApiContactsVCardHelper
 		$oVCard->VERSION = '3.0';
 		$oVCard->PRODID = '-//Afterlogic//7.5.x//EN';
 
-		$oVCard->UID = $oContact->sUUID;
+		$oVCard->UID = $oContact->UUID;
 
 		$oVCard->FN = $oContact->FullName;
 		$oVCard->N = array(
