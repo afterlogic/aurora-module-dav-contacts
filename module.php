@@ -116,7 +116,7 @@ class DavContactsModule extends AApiModule
 					$mImportResult['ParsedCount']++;
 					if (!isset($oContact) || empty($oContact))
 					{
-						if ($oContactsDecorator->CreateContact($aContactData, $aArgs['User']->iId))
+						if ($oContactsDecorator->CreateContact($aContactData, $aArgs['User']->EntityId))
 						{
 							$mImportResult['ImportedCount']++;
 						}
