@@ -300,7 +300,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */ CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
@@ -334,7 +334,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */ CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
@@ -426,7 +426,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 	 * @param int $iIdGroup
 	 * @return boolean
 	 */
-	public function getContactItems($iSortField = EContactSortField::Email, $iSortOrder = ESortOrder::ASC,
+	public function getContactItems($iSortField = \EContactSortField::Email, $iSortOrder = \ESortOrder::ASC,
 		$iOffset = 0, $iRequestLimit = 20, $aFilters = array(), $iIdGroup = 0)
 	{
 		$mResult = false;
@@ -510,7 +510,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 	 * @return bool|array
 	 */
 	public function getGroupItems($iUserId,
-		$iSortField = EContactSortField::Name, $iSortOrder = ESortOrder::ASC,
+		$iSortField = \EContactSortField::Name, $iSortOrder = \ESortOrder::ASC,
 		$iOffset = 0, $iRequestLimit = 20, $sSearch = '', $sFirstCharacter = '', $iContactId = 0)
 	{
 		$mResult = false;
@@ -551,7 +551,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 		try
 		{
 			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */ CApi::GetSystemManager('capability');
+			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\CApi::GetSystemManager('capability');
 			if ($oApiCapaManager)
 			{
 				if ($oApiCapaManager->isPersonalContactsSupported($oAccount))
@@ -588,7 +588,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 		try
 		{
 			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */ CApi::GetSystemManager('capability');
+			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\CApi::GetSystemManager('capability');
 
 			if (!$bGlobalOnly && $oApiCapaManager->isPersonalContactsSupported($oAccount))
 			{
@@ -661,11 +661,11 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 			if ($iRequestLimit > count($mResult) && $oApiCapaManager->isGlobalSuggestContactsSupported($oAccount))
 			{
-				$oApiGcontactManager = /* @var CApiGcontactsManager */ CApi::Manager('gcontacts');
+				$oApiGcontactManager = /* @var CApiGcontactsManager */ \CApi::Manager('gcontacts');
 				if ($oApiGcontactManager)
 				{
 					//$sSearch, $bPhoneOnly
-					$aAccountItems = $oApiGcontactManager->getContactItems(EContactSortField::Frequency, ESortOrder::DESC, 0, $iRequestLimit, array(), 0);
+					$aAccountItems = $oApiGcontactManager->getContactItems(\EContactSortField::Frequency, \ESortOrder::DESC, 0, $iRequestLimit, array(), 0);
 
 					if (is_array($aAccountItems))
 					{
@@ -738,7 +738,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */ CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
@@ -793,7 +793,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */ CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
@@ -930,7 +930,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */ CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($oAccount->IdUser);

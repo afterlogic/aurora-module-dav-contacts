@@ -89,7 +89,7 @@ class DavContactsModule extends AApiModule
 				foreach ($aArgs['Contacts'] as $oContact)
 				{
 					$oVCard = new \Sabre\VObject\Component\VCard();
-					CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+					\CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
 					$sOutput .= $oVCard->serialize();
 				}
 			}
@@ -111,7 +111,7 @@ class DavContactsModule extends AApiModule
 			{
 				while ($oVCard = $oSplitter->getNext())
 				{
-					$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard);
+					$aContactData = \CApiContactsVCardHelper::GetContactDataFromVcard($oVCard);
 					$oContact = isset($aContactData['UUID']) ? $oApiContactsManager->getContact($aContactData['UUID']) : null;
 					$mImportResult['ParsedCount']++;
 					if (!isset($oContact) || empty($oContact))

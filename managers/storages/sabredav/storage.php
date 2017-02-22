@@ -62,7 +62,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		$this->GroupsCache = array();
 //		$this->AccountsCache = array();
 
-		$this->ApiUsersManager = CApi::GetSystemManager('users');
+		$this->ApiUsersManager =\CApi::GetSystemManager('users');
 	}
 
 	/**
@@ -506,7 +506,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		{
 			return 0;
 		}
-		else if (ESortOrder::ASC == $iSortOrder)
+		else if (\ESortOrder::ASC == $iSortOrder)
 		{
 			return ($a->{$sSortField} > $b->{$sSortField}) ? -1 : 1;
 		}
@@ -807,7 +807,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			unset($oVCard);
 		}
 
-		$this->sortItems($aResult, EContactSortField::Frequency, ESortOrder::ASC);
+		$this->sortItems($aResult, \EContactSortField::Frequency, \ESortOrder::ASC);
 
 		return array_slice($aResult, 0, $iRequestLimit);
 	}
