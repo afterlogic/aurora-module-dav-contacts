@@ -25,14 +25,14 @@
  *
  * @package ContactsBase
  */
-class CApiDavContactsManager extends AApiManagerWithStorage
+class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 {
 	/**
 	 * Creates a new instance of the object.
 	 *
-	 * @param CApiGlobalManager &$oManager
+	 * @param \Aurora\System\GlobalManager &$oManager
 	 */
-	public function __construct(CApiGlobalManager &$oManager, $sForcedStorage = '', AApiModule $oModule = null)
+	public function __construct(\Aurora\System\GlobalManager &$oManager, $sForcedStorage = '', \Aurora\System\AbstractModule $oModule = null)
 	{
 		parent::__construct('', $oManager, 'sabredav', $oModule);
 	}
@@ -300,7 +300,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
@@ -334,7 +334,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
@@ -551,7 +551,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 		try
 		{
 			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\CApi::GetSystemManager('capability');
+			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\Aurora\System\Api::GetSystemManager('capability');
 			if ($oApiCapaManager)
 			{
 				if ($oApiCapaManager->isPersonalContactsSupported($oAccount))
@@ -588,7 +588,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 		try
 		{
 			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\CApi::GetSystemManager('capability');
+			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\Aurora\System\Api::GetSystemManager('capability');
 
 			if (!$bGlobalOnly && $oApiCapaManager->isPersonalContactsSupported($oAccount))
 			{
@@ -661,7 +661,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 			if ($iRequestLimit > count($mResult) && $oApiCapaManager->isGlobalSuggestContactsSupported($oAccount))
 			{
-				$oApiGcontactManager = /* @var CApiGcontactsManager */ \CApi::Manager('gcontacts');
+				$oApiGcontactManager = /* @var CApiGcontactsManager */ \Aurora\System\Api::Manager('gcontacts');
 				if ($oApiGcontactManager)
 				{
 					//$sSearch, $bPhoneOnly
@@ -738,7 +738,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
@@ -793,7 +793,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
@@ -930,7 +930,7 @@ class CApiDavContactsManager extends AApiManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\CApi::Manager('voice');
+			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
 			if ($oApiVoiceManager)
 			{
 				$oApiVoiceManager->flushCallersNumbersCache($oAccount->IdUser);

@@ -1,6 +1,6 @@
 <?php
 
-class DavContactsModule extends AApiModule
+class DavContactsModule extends \Aurora\System\AbstractModule
 {
 	public $oApiContactsManager = null;
 
@@ -42,13 +42,13 @@ class DavContactsModule extends AApiModule
 	 */
 	public function CreateContact($UserId, $VCard, $UUID)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
 		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
-		$mResult = \CApi::GetModuleDecorator('Contacts')->CreateContact($aContactData, $UserId);
+		$mResult = \Aurora\System\Api::GetModuleDecorator('Contacts')->CreateContact($aContactData, $UserId);
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
 		
 		return $mResult;
@@ -62,13 +62,13 @@ class DavContactsModule extends AApiModule
 	 */
 	public function UpdateContact($VCard, $UUID)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
 		
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
-		$mResult = \CApi::GetModuleDecorator('Contacts')->UpdateContact($aContactData);
+		$mResult = \Aurora\System\Api::GetModuleDecorator('Contacts')->UpdateContact($aContactData);
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 		
 		return $mResult;
@@ -105,7 +105,7 @@ class DavContactsModule extends AApiModule
 			// You can either pass a readable stream, or a string.
 			$oHandler = fopen($aArgs['TempFileName'], 'r');
 			$oSplitter = new \Sabre\VObject\Splitter\VCard($oHandler);
-			$oContactsDecorator = \CApi::GetModuleDecorator('Contacts');
+			$oContactsDecorator = \Aurora\System\Api::GetModuleDecorator('Contacts');
 			$oApiContactsManager = $oContactsDecorator ? $oContactsDecorator->GetApiContactsManager() : null;
 			if ($oApiContactsManager)
 			{
@@ -134,11 +134,11 @@ class DavContactsModule extends AApiModule
 	{
 		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
 		{
-			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 			$sUUID = isset($aResult) ? $aResult : false;
 			if ($sUUID)
 			{
-				$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($sUUID);
+				$oContact = \Aurora\System\Api::GetModuleDecorator('Contacts')->GetContact($sUUID);
 				if ($oContact instanceof \CContact)
 				{
 					if (!$this->oApiContactsManager->createContact($oContact))
@@ -158,11 +158,11 @@ class DavContactsModule extends AApiModule
 	{
 		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
 		{
-			\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
 			if($aResult && is_array($aArgs['Contact']) && isset($aArgs['Contact']['UUID']))
 			{
-				$oContact = \CApi::GetModuleDecorator('Contacts')->GetContact($aArgs['Contact']['UUID']);
+				$oContact = \Aurora\System\Api::GetModuleDecorator('Contacts')->GetContact($aArgs['Contact']['UUID']);
 				if ($oContact instanceof \CContact)
 				{
 					$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->UUID.'.vcf');
@@ -191,12 +191,12 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterDeleteContacts(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 
 		if ($aResult && isset($aArgs['UUIDs']))
 		{
 			if (!$this->oApiContactsManager->deleteContacts(
-				\CApi::getAuthenticatedUserId(),
+				\Aurora\System\Api::getAuthenticatedUserId(),
 				$aArgs['UUIDs'])
 			)
 			{
@@ -212,7 +212,7 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterCreateGroup(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}
 	
 	/**
@@ -221,7 +221,7 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterUpdateGroup(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}	
 	
 	/**
@@ -230,7 +230,7 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onDeleteGroup(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}
 	
 	/**
@@ -239,7 +239,7 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterAddContactsToGroup(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}
 	
 	/**
@@ -248,6 +248,6 @@ class DavContactsModule extends AApiModule
 	 */
 	public function onAfterRemoveContactsFromGroup(&$aArgs, &$aResult)
 	{
-		\CApi::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
 	}	
 }

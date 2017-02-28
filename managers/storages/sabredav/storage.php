@@ -46,9 +46,9 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 //	protected $AccountsCache;
 
 	/**
-	 * @param CApiGlobalManager &$oManager
+	 * @param \Aurora\System\GlobalManager &$oManager
 	 */
-	public function __construct(AApiManager &$oManager)
+	public function __construct(\Aurora\System\AbstractManager &$oManager)
 	{
 		parent::__construct('sabredav', $oManager);
 
@@ -62,7 +62,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		$this->GroupsCache = array();
 //		$this->AccountsCache = array();
 
-		$this->ApiUsersManager =\CApi::GetSystemManager('users');
+		$this->ApiUsersManager =\Aurora\System\Api::GetSystemManager('users');
 	}
 
 	/**
@@ -71,7 +71,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 	public function InitByAccount()
 	{
 		$bResult = false;
-		$oUser = \CApi::getAuthenticatedUser();
+		$oUser = \Aurora\System\Api::getAuthenticatedUser();
 //		if ($oAccount && (!$this->Account || $this->Account->Email !== $oAccount->Email))
 		if ($oUser)
 		{
@@ -372,7 +372,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 					}
 					catch(Exception $ex)
 					{
-						CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+						\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 					}
 					if ($oVCard)
 					{
@@ -475,7 +475,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 				}
 				catch(Exception $ex)
 				{
-					CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+					\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 				}
 				if ($oVCard)
 				{
@@ -568,7 +568,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			}
 			catch(Exception $ex)
 			{
-				CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+				\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 			}
 			if (isset($oVCard))
 			{
@@ -787,7 +787,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			}
 			catch(Exception $ex)
 			{
-				CApi::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+				\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 			}
 			if (isset($oVCard))
 			{
@@ -838,7 +838,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 				}
 				catch (Exception $ex)
 				{
-					CApi::Log($ex->getTraceAsString());
+					\Aurora\System\Api::Log($ex->getTraceAsString());
 					$bResult = false;
 				}
 			}
@@ -863,7 +863,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			$sETag = md5($sData);
 			if ($oContact->ETag !== $sETag)
 			{
- 				throw new CApiBaseException(Errs::Sabre_PreconditionFailed);
+ 				throw new \CApiBaseException(Errs::Sabre_PreconditionFailed);
 			}
  */
 
@@ -1306,7 +1306,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 				}
 				catch (Exception $ex)
 				{
-					CApi::Log($ex->getTraceAsString());
+					\Aurora\System\Api::Log($ex->getTraceAsString());
 					$bResult = false;
 				}
 			}
