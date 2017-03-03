@@ -62,7 +62,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		$this->GroupsCache = array();
 //		$this->AccountsCache = array();
 
-		$this->ApiUsersManager =\Aurora\System\Api::GetSystemManager('users');
+//		$this->ApiUsersManager =\Aurora\System\Api::GetSystemManager('users');
 	}
 
 	/**

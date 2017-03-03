@@ -1,6 +1,6 @@
 <?php
 
-class DavContactsModule extends \Aurora\System\AbstractModule
+class DavContactsModule extends \Aurora\System\Module\AbstractModule
 {
 	public $oApiContactsManager = null;
 
@@ -38,7 +38,7 @@ class DavContactsModule extends \Aurora\System\AbstractModule
 	 * @param int $iUserId
 	 * @param string $VCard
 	 * @return bool|string
-	 * @throws \System\Exceptions\ApiException
+	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
 	public function CreateContact($UserId, $VCard, $UUID)
 	{
@@ -58,7 +58,7 @@ class DavContactsModule extends \Aurora\System\AbstractModule
 	 * 
 	 * @param string $VCard
 	 * @return bool|string
-	 * @throws \System\Exceptions\ApiException
+	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
 	public function UpdateContact($VCard, $UUID)
 	{
