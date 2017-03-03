@@ -60,7 +60,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				}
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oContact = false;
 			$this->setLastException($oException);
@@ -92,7 +92,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				}
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oContact = false;
 			$this->setLastException($oException);
@@ -124,7 +124,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				}
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oContact = false;
 			$this->setLastException($oException);
@@ -157,7 +157,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				}
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oContact = false;
 			$this->setLastException($oException);
@@ -181,7 +181,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$aContactIds = $this->oStorage->getSharedContactIds($iUserId, $iSharedTenantId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$aContactIds = false;
 			$this->setLastException($oException);
@@ -202,7 +202,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$aGroupIds = $this->oStorage->getContactGroupIds($oContact);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$aGroupIds = false;
 			$this->setLastException($oException);
@@ -224,7 +224,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$oGroup = $this->oStorage->getGroupById($iUserId, $mGroupId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oGroup = false;
 			$this->setLastException($oException);
@@ -246,7 +246,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$oGroup = $this->oStorage->getGroupByStrId($iUserId, $sGroupStrId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oGroup = false;
 			$this->setLastException($oException);
@@ -268,7 +268,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$oGroup = $this->oStorage->getGroupByName($iUserId, $sName);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oGroup = false;
 			$this->setLastException($oException);
@@ -292,7 +292,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				$bResult = $this->oStorage->updateContact($oContact);
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -326,7 +326,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				$bResult = $this->oStorage->updateContactUserId($oContact, $iUserId);
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -358,7 +358,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				$bResult = $this->oStorage->updateGroup($oGroup);
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -384,7 +384,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$iResult = $this->oStorage->getContactItemsCount($iUserId, $sSearch, $sFirstCharacter, $iGroupId, $iTenantId, $bAll);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$iResult = 0;
 			$this->setLastException($oException);
@@ -407,7 +407,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$mResult = $this->oStorage->getContactItemsWithoutOrder($iUserId, $iOffset, $iRequestLimit);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$mResult = false;
 			$this->setLastException($oException);
@@ -434,7 +434,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$mResult = $this->oStorage->getContactItems($iSortField, $iSortOrder, $iOffset, $iRequestLimit, $aFilters, $iIdGroup);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$mResult = false;
 			$this->setLastException($oException);
@@ -455,7 +455,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$mResult = $this->oStorage->GetContactItemObjects($mUserId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$mResult = false;
 			$this->setLastException($oException);
@@ -488,7 +488,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$iResult = $this->oStorage->getGroupItemsCount($iUserId, $sSearch, $sFirstCharacter);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$iResult = 0;
 			$this->setLastException($oException);
@@ -531,7 +531,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 //				$iSortOrder
 //			);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$mResult = false;
 			$this->setLastException($oException);
@@ -561,7 +561,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				}
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$mResult = false;
 			$this->setLastException($oException);
@@ -706,7 +706,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				array_splice($mResult, $iRequestLimit);
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$mResult = false;
 			$this->setLastException($oException);
@@ -730,7 +730,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				$bResult = $this->oStorage->createContact($oContact);
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -763,7 +763,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				$bResult = $this->oStorage->createGroup($oGroup);
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -785,7 +785,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->deleteContacts($iUserId, $aContactIds, $iTenantId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -816,7 +816,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->deleteSuggestContacts($iUserId, $aContactIds);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -839,7 +839,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->resetContactFrequency($iUserId, $sContactId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -860,7 +860,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->deleteGroups($iUserId, $aGroupIds);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -881,7 +881,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->deleteGroup($iUserId, $mGroupId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -902,7 +902,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->updateSuggestTable($iUserId, $aEmails);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -922,7 +922,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->clearAllContactsAndGroups($oAccount);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -950,7 +950,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->flushContacts();
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -971,7 +971,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->addContactsToGroup($oGroup, $aContactIds);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -992,7 +992,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->removeContactsFromGroup($oGroup, $aContactIds);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -1014,7 +1014,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$mResult = $this->oStorage->ConvertedContactLocalId($oAccount, $mContactId, $sStorage);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$this->setLastException($oException);
 		}
@@ -1034,7 +1034,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$aResult = $this->oStorage->ConvertedContactLocalIdCollection($oAccount, $sStorage);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$this->setLastException($oException);
 		}
@@ -1053,7 +1053,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$aResult = $this->oStorage->ContactIdsLinkedToGroups($aIds);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$this->setLastException($oException);
 		}
@@ -1081,7 +1081,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 				}
 			}
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$oContact = false;
 			$this->setLastException($oException);
@@ -1102,7 +1102,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->getGroupEvents($iGroupId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -1123,7 +1123,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->getGroupEvent($sCalendarId, $sEventId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -1145,7 +1145,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->addEventToGroup($iGroupId, $sCalendarId, $sEventId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -1167,7 +1167,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->removeEventFromGroup($iGroupId, $sCalendarId, $sEventId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);
@@ -1188,7 +1188,7 @@ class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
 		{
 			$bResult = $this->oStorage->removeEventFromAllGroups($sCalendarId, $sEventId);
 		}
-		catch (CApiBaseException $oException)
+		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
 			$bResult = false;
 			$this->setLastException($oException);

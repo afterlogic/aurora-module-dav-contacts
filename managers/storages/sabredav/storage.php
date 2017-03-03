@@ -863,7 +863,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			$sETag = md5($sData);
 			if ($oContact->ETag !== $sETag)
 			{
- 				throw new \CApiBaseException(Errs::Sabre_PreconditionFailed);
+ 				throw new \Aurora\System\Exceptions\BaseException(Errs::Sabre_PreconditionFailed);
 			}
  */
 
