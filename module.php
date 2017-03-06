@@ -1,6 +1,8 @@
 <?php
 
-class DavContactsModule extends \Aurora\System\Module\AbstractModule
+namespace Aurora\Modules\DavContacts;
+
+class Module extends \Aurora\System\Module\AbstractModule
 {
 	public $oApiContactsManager = null;
 
