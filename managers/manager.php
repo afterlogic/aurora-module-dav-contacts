@@ -21,7 +21,7 @@
 /**
  * @ignore
  *
- * CApiIntegratorManager class summary
+ * \Aurora\System\Managers\Integrator\Manager class summary
  *
  * @package ContactsBase
  */
@@ -551,7 +551,7 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 		try
 		{
 			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\Aurora\System\Api::GetSystemManager('capability');
+			$oApiCapaManager = /* @var $oApiCapaManager \Aurora\System\Managers\Capability\Manager */\Aurora\System\Api::GetSystemManager('capability');
 			if ($oApiCapaManager)
 			{
 				if ($oApiCapaManager->isPersonalContactsSupported($oAccount))
@@ -588,7 +588,7 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 		try
 		{
 			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager CApiCapabilityManager */\Aurora\System\Api::GetSystemManager('capability');
+			$oApiCapaManager = /* @var $oApiCapaManager \Aurora\System\Managers\Capability\Manager */\Aurora\System\Api::GetSystemManager('capability');
 
 			if (!$bGlobalOnly && $oApiCapaManager->isPersonalContactsSupported($oAccount))
 			{
