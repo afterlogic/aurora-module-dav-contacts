@@ -23,12 +23,12 @@
  * @package ContactsBase
  * @subpackage Storages
  */
-class CApiDavContactsStorage extends \Aurora\System\AbstractManagerStorage
+class CApiDavContactsStorage extends \Aurora\System\Managers\AbstractManagerStorage
 {
 	/**
-	 * @param \Aurora\System\AbstractManager &$oManager
+	 * @param \Aurora\System\Managers\AbstractManager &$oManager
 	 */
-	public function __construct($sStorageName, \Aurora\System\AbstractManager &$oManager)
+	public function __construct($sStorageName, \Aurora\System\Managers\AbstractManager &$oManager)
 	{
 		parent::__construct('', $sStorageName, $oManager);
 	}

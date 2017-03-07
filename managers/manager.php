@@ -25,14 +25,14 @@
  *
  * @package ContactsBase
  */
-class CApiDavContactsManager extends \Aurora\System\AbstractManagerWithStorage
+class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWithStorage
 {
 	/**
 	 * Creates a new instance of the object.
 	 *
-	 * @param \Aurora\System\GlobalManager &$oManager
+	 * @param \Aurora\System\Managers\GlobalManager &$oManager
 	 */
-	public function __construct(\Aurora\System\GlobalManager &$oManager, $sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
+	public function __construct(\Aurora\System\Managers\GlobalManager &$oManager, $sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
 	{
 		parent::__construct('', $oManager, 'sabredav', $oModule);
 	}
