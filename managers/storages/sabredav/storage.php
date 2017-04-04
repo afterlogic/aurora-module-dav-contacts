@@ -133,25 +133,40 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 	 */
 	public function getContactById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
-		$oContact = false;
+		$oContactItem = $this->getVCardObjectById($iUserId, $mContactId, $sAddressBookName);
+		
+		if ($oContactItem)
+		{
+			$sVCardData = $oContactItem->get();
+			if ($sVCardData)
+			{
+				$oContact = new CContact();
+				$oContact->InitFromVCardStr($iUserId, $sVCardData);
+				$oContact->IdContact = $mContactId;
+				$oContact->ETag = trim($oContactItem->getETag(), '"');
+			}
+		}
+
+		return $oContact;
+	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param mixed $mContactId
+	 * @param string $sAddressBookName
+	 * @return CContact | false
+	 */
+	public function getVCardObjectById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
+	{
+		$mResult = false;
 		if($this->init($iUserId))
 		{
 			$oAddressBook = $this->getAddressBook($iUserId, $sAddressBookName);
-			$oContactItem = $this->geItem($iUserId, $oAddressBook, $mContactId);
-			if ($oContactItem)
-			{
-				$sVCardData = $oContactItem->get();
-				if ($sVCardData)
-				{
-					$oContact = new CContact();
-					$oContact->InitFromVCardStr($iUserId, $sVCardData);
-					$oContact->IdContact = $mContactId;
-					$oContact->ETag = trim($oContactItem->getETag(), '"');
-				}
-			}
+			$mResult = $this->geItem($iUserId, $oAddressBook, $mContactId . '.vcf');
+
 		}
-		return $oContact;
-	}
+		return $mResult;
+	}	
 
 	/**
 	 * @param int $iUserId

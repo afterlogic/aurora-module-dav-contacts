@@ -165,6 +165,34 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 	}
 	
 	/**
+     * Returns contact item identified by user ID and contact ID.
+     *
+	 * @param int $iUserId
+	 * @param mixed $mContactId
+     *
+	 * @return resource | bool
+	 */
+	public function getVCardObjectById($iUserId, $mContactId)
+	{
+		$mResult = null;
+		try
+		{
+			$oVCardObject = $this->oStorage->getVCardObjectById($iUserId, $mContactId);
+			if ($oVCardObject)
+			{
+				$mResult = $oVCardObject->get();
+			}
+		}
+		catch (\Aurora\System\Exceptions\BaseException $oException)
+		{
+			$mResult = false;
+			$this->setLastException($oException);
+		}
+		
+		return $mResult;
+	}	
+	
+	/**
      * Returns list of shared contacts by str_id value.
      *
 	 * @param int $iUserId

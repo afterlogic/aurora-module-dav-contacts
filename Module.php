@@ -94,6 +94,64 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		return $mResult;
 	}	
+	
+	/**
+	 * 
+	 * @param type $UserId
+	 * @param type $UUID
+	 * @param type $Storage
+	 * @param type $FileName
+	 */
+	public function SaveContactAsTempFile($UserId, $UUID, $Storage, $FileName)
+	{
+		$mResult = false;
+
+		$sVCardData = $this->oApiContactsManager->getVCardObjectById($UserId, $UUID);
+		if ($sVCardData)
+		{
+			$sUUID = \Aurora\System\Api::getAuthenticatedUserUUIDById($UserId);
+			try
+			{
+				$sMimeType = 'text/vcard';
+				$sTempName = md5($sUUID.$UUID);
+				$oApiFileCache = \Aurora\System\Api::GetSystemManager('Filecache');
+
+				if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
+				{
+					$oApiFileCache->put($sUUID, $sTempName, $sVCardData);
+				}
+
+				if ($oApiFileCache->isFileExists($sUUID, $sTempName))
+				{
+					$sHash = \Aurora\System\Api::EncodeKeyValues(array(
+						'TempFile' => true,
+						'UserId' => $UserId,
+						'Name' => $FileName,
+						'TempName' => $sTempName
+					));
+					$aActions = array(
+							'download' => array(
+							'url' => '?mail-attachment/' . $sHash
+						)
+					);
+					$mResult = array(
+						'TempName' => $sTempName,
+						'Name' => $FileName,
+						'Size' => $oApiFileCache->fileSize($sUUID, $sTempName),
+						'MimeType' => $sMimeType,
+						'Hash' => $sHash,
+						'Actions' => $aActions
+					);					
+				}
+			}
+			catch (\Exception $oException)
+			{
+				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::MailServerError, $oException);
+			}
+		}
+		
+		return $mResult;		
+	}	
 
 	public function onGetImportExportFormats(&$aFormats)
 	{
