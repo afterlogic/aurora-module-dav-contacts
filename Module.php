@@ -104,12 +104,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function SaveContactAsTempFile($UserId, $UUID, $Storage, $FileName)
 	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+
 		$mResult = false;
 
 		$sVCardData = $this->oApiContactsManager->getVCardObjectById($UserId, $UUID);
 		if ($sVCardData)
 		{
-			$sUUID = \Aurora\System\Api::getAuthenticatedUserUUIDById($UserId);
+			$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
 			try
 			{
 				$sMimeType = 'text/vcard';
@@ -131,7 +133,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					));
 					$aActions = array(
 							'download' => array(
-							'url' => '?mail-attachment/' . $sHash
+							'url' => '?file-cache/' . $sHash
 						)
 					);
 					$mResult = array(
