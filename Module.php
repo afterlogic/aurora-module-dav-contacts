@@ -125,25 +125,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 				if ($oApiFileCache->isFileExists($sUUID, $sTempName))
 				{
-					$sHash = \Aurora\System\Api::EncodeKeyValues(array(
-						'TempFile' => true,
-						'UserId' => $UserId,
-						'Name' => $FileName,
-						'TempName' => $sTempName
-					));
-					$aActions = array(
-							'download' => array(
-							'url' => '?file-cache/' . $sHash
-						)
-					);
-					$mResult = array(
-						'TempName' => $sTempName,
-						'Name' => $FileName,
-						'Size' => $oApiFileCache->fileSize($sUUID, $sTempName),
-						'MimeType' => $sMimeType,
-						'Hash' => $sHash,
-						'Actions' => $aActions
-					);					
+					$mResult = \Aurora\System\Utils::GetClientFileResponse($UserId, $FileName, $sTempName, $oApiFileCache->fileSize($sUUID, $sTempName));
 				}
 			}
 			catch (\Exception $oException)
