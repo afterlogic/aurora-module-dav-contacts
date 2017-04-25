@@ -34,13 +34,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function init() 
 	{
-		$this->incClass('vcard-helper');
-		
 		$this->oApiContactsManager = $this->GetManager();
-		
-		$this->subscribeEvent('Contacts::GetImportExportFormats', array($this, 'onGetImportExportFormats'));
-		$this->subscribeEvent('Contacts::GetExportOutput', array($this, 'onGetExportOutput'));
-		$this->subscribeEvent('Contacts::Import', array($this, 'onImport'));
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
@@ -137,58 +131,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;		
 	}	
 
-	public function onGetImportExportFormats(&$aFormats)
-	{
-		$aFormats[] = 'vcf';
-	}
-	
-	public function onGetExportOutput($aArgs, &$sOutput)
-	{
-		if ($aArgs['Format'] === 'vcf')
-		{
-            $sOutput = '';
-			if (is_array($aArgs['Contacts']))
-			{
-				foreach ($aArgs['Contacts'] as $oContact)
-				{
-					$oVCard = new \Sabre\VObject\Component\VCard();
-					\CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
-					$sOutput .= $oVCard->serialize();
-				}
-			}
-		}
-	}
-	
-	public function onImport($aArgs, &$mImportResult)
-	{
-		if ($aArgs['Format'] === 'vcf')
-		{
-			$mImportResult['ParsedCount'] = 0;
-			$mImportResult['ImportedCount'] = 0;
-			// You can either pass a readable stream, or a string.
-			$oHandler = fopen($aArgs['TempFileName'], 'r');
-			$oSplitter = new \Sabre\VObject\Splitter\VCard($oHandler);
-			$oContactsDecorator = \Aurora\System\Api::GetModuleDecorator('Contacts');
-			$oApiContactsManager = $oContactsDecorator ? $oContactsDecorator->GetApiContactsManager() : null;
-			if ($oApiContactsManager)
-			{
-				while ($oVCard = $oSplitter->getNext())
-				{
-					$aContactData = \CApiContactsVCardHelper::GetContactDataFromVcard($oVCard);
-					$oContact = isset($aContactData['UUID']) ? $oApiContactsManager->getContact($aContactData['UUID']) : null;
-					$mImportResult['ParsedCount']++;
-					if (!isset($oContact) || empty($oContact))
-					{
-						if ($oContactsDecorator->CreateContact($aContactData, $aArgs['User']->EntityId))
-						{
-							$mImportResult['ImportedCount']++;
-						}
-					}
-				}
-			}
-		}
-	}
-	
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
