@@ -125,6 +125,8 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 	 */
 	public function getContactById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
+		$oContact = false;
+		
 		$oContactItem = $this->getVCardObjectById($iUserId, $mContactId, $sAddressBookName);
 		
 		if ($oContactItem)
