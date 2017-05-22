@@ -49,7 +49,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function CreateContact($UserId, $VCard, $UUID)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
@@ -69,7 +69,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function UpdateContact($VCard, $UUID)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
@@ -90,7 +90,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function SaveContactAsTempFile($UserId, $UUID, $Storage, $FileName)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		$mResult = false;
 
@@ -131,7 +131,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
 		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 			$sUUID = isset($aResult) ? $aResult : false;
 			if ($sUUID)
 			{
@@ -155,7 +155,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
 		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 			if($aResult && is_array($aArgs['Contact']) && isset($aArgs['Contact']['UUID']))
 			{
@@ -188,7 +188,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterDeleteContacts(&$aArgs, &$aResult)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		if ($aResult && isset($aArgs['UUIDs']))
 		{
@@ -209,7 +209,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterCreateGroup(&$aArgs, &$aResult)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
 	
 	/**
@@ -218,7 +218,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterUpdateGroup(&$aArgs, &$aResult)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}	
 	
 	/**
@@ -227,7 +227,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onDeleteGroup(&$aArgs, &$aResult)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
 	
 	/**
@@ -236,7 +236,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterAddContactsToGroup(&$aArgs, &$aResult)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
 	
 	/**
@@ -245,6 +245,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterRemoveContactsFromGroup(&$aArgs, &$aResult)
 	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\EUserRole::NormalUser);
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}	
 }
