@@ -26,7 +26,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function init() 
 	{
-		$this->oApiContactsManager = $this->GetManager();
+		$this->oApiContactsManager = new Manager('', $this);
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));

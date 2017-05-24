@@ -8,14 +8,9 @@
  * For full statements of the licenses see LICENSE-AFTERLOGIC and LICENSE-AGPL3 files.
  */
 
-/**
- * @ignore
- *
- * \Aurora\System\Managers\Integrator\Manager class summary
- *
- * @package ContactsBase
- */
-class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWithStorage
+namespace Aurora\Modules\DavContacts;
+
+class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 {
 	/**
 	 * Creates a new instance of the object.

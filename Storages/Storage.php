@@ -8,12 +8,9 @@
  * For full statements of the licenses see LICENSE-AFTERLOGIC and LICENSE-AGPL3 files.
  */
 
-/**
- * @ignore
- * @package ContactsBase
- * @subpackage Storages
- */
-class CApiDavContactsStorage extends \Aurora\System\Managers\AbstractManagerStorage
+namespace Aurora\Modules\DavContacts\Storages;
+
+class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 {
 	/**
 	 * @param \Aurora\System\Managers\AbstractManager &$oManager
