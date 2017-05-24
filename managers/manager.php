@@ -22,9 +22,9 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 	 *
 	 * @param \Aurora\System\Managers\GlobalManager &$oManager
 	 */
-	public function __construct(\Aurora\System\Managers\GlobalManager &$oManager, $sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
+	public function __construct($sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
 	{
-		parent::__construct('', $oManager, 'sabredav', $oModule);
+		parent::__construct('', 'sabredav', $oModule);
 	}
 
 	/**
@@ -444,7 +444,7 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 	 * @param int $iIdGroup
 	 * @return boolean
 	 */
-	public function getContactItems($iSortField = \EContactSortField::Email, $iSortOrder = \ESortOrder::ASC,
+	public function getContactItems($iSortField = \EContactSortField::Email, $iSortOrder = \Aurora\System\Enums\SortOrder::ASC,
 		$iOffset = 0, $iRequestLimit = 20, $aFilters = array(), $iIdGroup = 0)
 	{
 		$mResult = false;
@@ -518,7 +518,7 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 	/**
 	 * @param int $iUserId
 	 * @param int $iSortField Default value is **EContactSortField::Name 1**,
-	 * @param int $iSortOrder Default value is **ESortOrder::ASC 0**,
+	 * @param int $iSortOrder Default value is **\Aurora\System\Enums\SortOrder::ASC 0**,
 	 * @param int $iOffset Default value is **0**
 	 * @param int $iRequestLimit Default value is **20**
 	 * @param string $sSearch Default value is empty string
@@ -528,7 +528,7 @@ class CApiDavContactsManager extends \Aurora\System\Managers\AbstractManagerWith
 	 * @return bool|array
 	 */
 	public function getGroupItems($iUserId,
-		$iSortField = \EContactSortField::Name, $iSortOrder = \ESortOrder::ASC,
+		$iSortField = \EContactSortField::Name, $iSortOrder = \Aurora\System\Enums\SortOrder::ASC,
 		$iOffset = 0, $iRequestLimit = 20, $sSearch = '', $sFirstCharacter = '', $iContactId = 0)
 	{
 		$mResult = false;

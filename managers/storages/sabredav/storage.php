@@ -513,7 +513,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 		{
 			return 0;
 		}
-		else if (\ESortOrder::ASC == $iSortOrder)
+		else if (\Aurora\System\Enums\SortOrder::ASC == $iSortOrder)
 		{
 			return ($a->{$sSortField} > $b->{$sSortField}) ? -1 : 1;
 		}
@@ -814,7 +814,7 @@ class CApiDavContactsSabredavStorage extends CApiDavContactsStorage
 			unset($oVCard);
 		}
 
-		$this->sortItems($aResult, \EContactSortField::Frequency, \ESortOrder::ASC);
+		$this->sortItems($aResult, \EContactSortField::Frequency, \Aurora\System\Enums\SortOrder::ASC);
 
 		return array_slice($aResult, 0, $iRequestLimit);
 	}
