@@ -606,11 +606,11 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-			if ($oApiVoiceManager)
-			{
-				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
-			}
+//			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
+//			if ($oApiVoiceManager)
+//			{
+//				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
+//			}
 		}
 
 		return $bResult;
@@ -661,11 +661,11 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-			if ($oApiVoiceManager)
-			{
-				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
-			}
+//			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
+//			if ($oApiVoiceManager)
+//			{
+//				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
+//			}
 		}
 
 		return $bResult;

@@ -1003,7 +1003,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				$oContact->UUID .= '.vcf';
 
 				$oVCard = new \Sabre\VObject\Component\VCard();
-				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+				\CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
 
 				$oAddressBook->createFile($oContact->UUID, $oVCard->serialize());
 				$bResult = true;
