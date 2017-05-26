@@ -10,7 +10,7 @@
 
 namespace Aurora\Modules\DavContacts\Storages\Sabredav;
 
-class Storage extends Aurora\Modules\DavContacts\Storages\Storage
+class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 {
 	/**
 	 * @var string
@@ -38,7 +38,7 @@ class Storage extends Aurora\Modules\DavContacts\Storages\Storage
 	 */
 	public function __construct(\Aurora\System\Managers\AbstractManager &$oManager)
 	{
-		parent::__construct('sabredav', $oManager);
+		parent::__construct($oManager);
 
 //		$this->Account = null;
 

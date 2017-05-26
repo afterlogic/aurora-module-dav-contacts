@@ -13,14 +13,6 @@ namespace Aurora\Modules\DavContacts\Storages;
 class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 {
 	/**
-	 * @param \Aurora\System\Managers\AbstractManager &$oManager
-	 */
-	public function __construct($sStorageName, \Aurora\System\Managers\AbstractManager &$oManager)
-	{
-		parent::__construct('', $sStorageName, $oManager);
-	}
-
-	/**
 	 * @param int $iUserId
 	 * @param mixed $mContactId
 	 * @return CContact | false
