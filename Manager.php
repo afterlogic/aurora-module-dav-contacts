@@ -563,16 +563,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		$mResult = false;
 		try
 		{
-			$mResult = array();
-			$oApiCapaManager = /* @var $oApiCapaManager \Aurora\System\Managers\Capability\Manager */\Aurora\System\Api::GetSystemManager('capability');
-			if ($oApiCapaManager)
-			{
-				if ($oApiCapaManager->isPersonalContactsSupported($oAccount))
-				{
-					$mResult = $this->oStorage->GetAllContactsNamesWithPhones($oAccount->IdUser, $oAccount->IdTenant,
-						$oApiCapaManager->isGlobalContactsSupported($oAccount));
-				}
-			}
+			$mResult = array(); // ЕЩВЩ
 		}
 		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
