@@ -102,7 +102,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			{
 				$sMimeType = 'text/vcard';
 				$sTempName = md5($sUUID.$UUID);
-				$oApiFileCache = new \Aurora\System\Managers\Filecache\Manager();
+				$oApiFileCache = new \Aurora\System\Managers\Filecache();
 
 				if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
 				{
