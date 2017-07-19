@@ -93,8 +93,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		$mResult = false;
-
-		$sVCardData = $this->oApiContactsManager->getVCardObjectById($UserId, $UUID);
+		$sVCardData = null;
+				
+		if ($Storage === 'team')
+		{
+			$oContact = \Aurora\System\Api::GetModuleDecorator('Contacts')->GetContact($UUID);
+			
+			$oVCard = new \Sabre\VObject\Component\VCard();
+			\CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+			$sVCardData = $oVCard->serialize();
+		}
+		else
+		{
+			$sVCardData = $this->oApiContactsManager->getVCardObjectById($UserId, $UUID);
+		}
 		if ($sVCardData)
 		{
 			$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
