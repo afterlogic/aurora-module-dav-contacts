@@ -317,7 +317,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 //	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
 	 * @return bool
 	 */
 	public function clearAllContactsAndGroups($oAccount)

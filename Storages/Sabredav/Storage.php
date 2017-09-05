@@ -18,7 +18,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	public $Principal;
 
 	/**
-	 * @var CAccount
+	 * @var \Aurora\Modules\StandardAuth\Classes\Account
 	 */
 //	protected $Account;
 
@@ -54,7 +54,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
 	 */
 	public function InitByAccount()
 	{
@@ -1289,7 +1289,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CAccount $oAccount
+	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
 	 * @return bool
 	 */
 	public function clearAllContactsAndGroups($oAccount)
