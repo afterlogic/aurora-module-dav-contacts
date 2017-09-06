@@ -52,7 +52,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
-		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
+		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard, $UUID);
 		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = \Aurora\Modules\Contacts\Module::Decorator()->CreateContact($aContactData, $UserId);
@@ -72,7 +72,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
-		$aContactData = CApiContactsVCardHelper::GetContactDataFromVcard($oVCard, $UUID);
+		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard, $UUID);
 		
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = \Aurora\Modules\Contacts\Module::Decorator()->UpdateContact($aContactData);
@@ -97,10 +97,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 				
 		if ($Storage === 'team')
 		{
-			$oContact = \Aurora\System\Api::GetModuleDecorator('Contacts')->GetContact($UUID);
+			$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($UUID);
 			
 			$oVCard = new \Sabre\VObject\Component\VCard();
-			\CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+			\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
 			$sVCardData = $oVCard->serialize();
 		}
 		else
@@ -148,7 +148,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($sUUID)
 			{
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
-				if ($oContact instanceof \CContact)
+				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					if (!$this->oApiContactsManager->createContact($oContact))
 					{
@@ -172,7 +172,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if($aResult && is_array($aArgs['Contact']) && isset($aArgs['Contact']['UUID']))
 			{
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aArgs['Contact']['UUID']);
-				if ($oContact instanceof \CContact)
+				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->UUID.'.vcf');
 					if ($oDavContact)

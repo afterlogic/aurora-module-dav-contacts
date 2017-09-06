@@ -15,7 +15,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mContactId
-	 * @return CContact | false
+	 * @return \Aurora\Modules\Contacts\Classes\Contact | false
 	 */
 	public function getContactById($iUserId, $mContactId)
 	{
@@ -24,7 +24,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 
 	/**
 	 * @param int $iUserId
-	 * @return CContact|null
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|null
 	 */
 	public function GetMyGlobalContact($iUserId)
 	{
@@ -34,7 +34,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param mixed $mTypeId
 	 * @param int $iContactType
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function GetContactByTypeId($mTypeId, $mContactId)
 	{
@@ -44,7 +44,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param string $sEmail
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function getContactByEmail($iUserId, $sEmail)
 	{
@@ -54,7 +54,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param string $sContactStrId
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function getContactByStrId($iUserId, $sContactStrId)
 	{
@@ -72,7 +72,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @return array|bool
 	 */
 	public function getContactGroupIds($oContact)
@@ -83,7 +83,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mGroupId
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupById($iUserId, $mGroupId)
 	{
@@ -93,7 +93,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param string $sGroupStrId
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupByStrId($iUserId, $sGroupStrId)
 	{
@@ -103,7 +103,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param string $sName
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupByName($iUserId, $sName)
 	{
@@ -211,7 +211,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 	
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @return bool
 	 */
 	public function updateContact($oContact)
@@ -220,7 +220,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 	
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @param int $iUserId
 	 * @return string
 	 */
@@ -230,7 +230,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @return bool
 	 */
 	public function updateGroup($oGroup)
@@ -239,7 +239,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @return bool
 	 */
 	public function createContact($oContact)
@@ -248,7 +248,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @return bool
 	 */
 	public function createGroup($oGroup)
@@ -335,7 +335,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @param array $aContactIds
 	 * @return bool
 	 */
@@ -347,7 +347,7 @@ class Storage extends \Aurora\System\Managers\AbstractManagerStorage
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mContactId
-	 * @return CContact | false
+	 * @return \Aurora\Modules\Contacts\Classes\Contact | false
 	 */
 	public function GetGlobalContactById($iUserId, $mContactId)
 	{

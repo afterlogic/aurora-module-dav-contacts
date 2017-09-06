@@ -119,7 +119,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 * @param int $iUserId
 	 * @param mixed $mContactId
 	 * @param string $sAddressBookName
-	 * @return CContact | false
+	 * @return \Aurora\Modules\Contacts\Classes\Contact | false
 	 */
 	public function getContactById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
@@ -132,7 +132,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			$sVCardData = $oContactItem->get();
 			if ($sVCardData)
 			{
-				$oContact = new CContact();
+				$oContact = new \Aurora\Modules\Contacts\Classes\Contact();
 				$oContact->InitFromVCardStr($iUserId, $sVCardData);
 				$oContact->IdContact = $mContactId;
 				$oContact->ETag = trim($oContactItem->getETag(), '"');
@@ -146,7 +146,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 * @param int $iUserId
 	 * @param mixed $mContactId
 	 * @param string $sAddressBookName
-	 * @return CContact | false
+	 * @return \Aurora\Modules\Contacts\Classes\Contact | false
 	 */
 	public function getVCardObjectById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
@@ -163,7 +163,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	/**
 	 * @param int $iUserId
 	 * @param string $sEmail
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function getContactByEmail($iUserId, $sEmail)
 	{
@@ -174,7 +174,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 * @param int $iUserId
 	 * @param string $sContactStrId
 	 * @param int $iSharedTenantId = null
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function getContactByStrId($iUserId, $sContactStrId, $iSharedTenantId = null)
 	{
@@ -184,7 +184,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	/**
 	 * @param int $iUserId
 	 * @param string $sContactStrId
-	 * @return CContact
+	 * @return \Aurora\Modules\Contacts\Classes\Contact
 	 */
 	public function GetSuggestContactByEmail($iUserId, $sContactStrId)
 	{
@@ -192,7 +192,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}	
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @return array|bool
 	 */
 	public function getContactGroupIds($oContact)
@@ -203,7 +203,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	/**
 	 * @param int $iUserId
 	 * @param mixed $mGroupId
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupById($iUserId, $mGroupId)
 	{
@@ -223,7 +223,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
 					if (isset($this->aGroupItemsCache[$oAddressBook->getName()][$mGroupId]))
 					{
-						$bResult = new CGroup();
+						$bResult = new \Aurora\Modules\Contacts\Classes\Group();
 						$bResult->IdUser = $iUserId;
 						$bResult->IdGroup = $mGroupId;
 						$bResult->IdGroupStr = $mGroupId;
@@ -244,7 +244,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	/**
 	 * @param int $iUserId
 	 * @param string $sGroupStrId
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupByStrId($iUserId, $sGroupStrId)
 	{
@@ -442,7 +442,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 							stripos($sTitle, $sSearch) !== false || $bFindEmail) &&
 							(empty($sGroupId) || (!empty($sGroupId) && strpos($sCategories, $sGroupId) !== false)))
 						{
-							$oContactItem = new CContactListItem();
+							$oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
 							$oContactItem->InitBySabreCardDAVCard($oVCard);
 							$oContactItem->Id = $sItemId;
 							$oContactItem->ETag = $oItem->getETag();
@@ -530,9 +530,9 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	protected function sortItems(&$aItems, $iSortField, $iSortOrder)
 	{
 		$aMapSortField = array(
-			EContactSortField::Email => 'Email',
-			EContactSortField::Name => 'Name',
-			EContactSortField::Frequency => 'Frequency'
+			\Aurora\Modules\Contacts\Enums\SortField::Email => 'Email',
+			\Aurora\Modules\Contacts\Enums\SortField::Name => 'Name',
+			\Aurora\Modules\Contacts\Enums\SortField::Frequency => 'Frequency'
 		);
 
 		if (!isset($aMapSortField[$iSortField]))
@@ -577,7 +577,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			}
 			if (isset($oVCard))
 			{
-				$oContactItem = new CContactListItem();
+				$oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
 				$oContactItem->InitBySabreCardDAVCard($oVCard);
 				$oContactItem->Id = $oItem->getName();
 
@@ -666,7 +666,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			{
 				foreach ($oContact->GroupIds as $sGroupId)
 				{
-					$oContactItem = new CContactListItem();
+					$oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
 					$oContactItem->Id = (string) $sGroupId;
 					$oContactItem->Name = (string) $sGroupId;
 					$oContactItem->IsGroup = true;
@@ -700,7 +700,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 						{
 							$aContactIds[] = $sContactId;
 						}
-						$oContactItem = new CContactListItem();
+						$oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
 						$oContactItem->Id = $sKey;
 						$oContactItem->Name = $sKey;
 						$oContactItem->IsGroup = true;
@@ -796,7 +796,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			}
 			if (isset($oVCard))
 			{
-				$oContactItem = new CContactListItem();
+				$oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
 				$oContactItem->InitBySabreCardDAVCard($oVCard);
 				$oContactItem->Id = $oItem->getName();
 
@@ -812,13 +812,13 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			unset($oVCard);
 		}
 
-		$this->sortItems($aResult, \EContactSortField::Frequency, \Aurora\System\Enums\SortOrder::ASC);
+		$this->sortItems($aResult, \Aurora\Modules\Contacts\Enums\SortField::Frequency, \Aurora\System\Enums\SortOrder::ASC);
 
 		return array_slice($aResult, 0, $iRequestLimit);
 	}
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @param int $iUserId
 	 * @return string
 	 */
@@ -852,7 +852,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 	
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @return bool
 	 */
 	public function updateContact($oContact)
@@ -875,7 +875,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			$oVCard = \Sabre\VObject\Reader::read($sData);
 			if ($oVCard)
 			{
-				CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+				\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
 				$oContactItem->put($oVCard->serialize());
 				$bResult = true;
 			}
@@ -886,7 +886,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @return bool
 	 */
 	public function updateGroup($oGroup)
@@ -988,7 +988,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @return bool
 	 */
 	public function createContact($oContact)
@@ -1003,7 +1003,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				$oContact->UUID .= '.vcf';
 
 				$oVCard = new \Sabre\VObject\Component\VCard();
-				\CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+				\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
 
 				$oAddressBook->createFile($oContact->UUID, $oVCard->serialize());
 				$bResult = true;
@@ -1024,7 +1024,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @return bool
 	 */
 	public function createGroup($oGroup)
@@ -1185,14 +1185,14 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				if ($mFindContact === false)
 				{
 					$sUUID = \Sabre\DAV\UUIDUtil::getUUID();
-					$oContact = new CContact();
+					$oContact = new \Aurora\Modules\Contacts\Classes\Contact();
 					$oContact->FullName = $sName;
 					$oContact->PersonalEmail = $sEmail;
 					$oContact->UUID = $sUUID;
 
 					$oVCard = new \Sabre\VObject\Component\VCard();
 					$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
-					CApiContactsVCardHelper::UpdateVCardFromContact($oContact, $oVCard);
+					\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
 
 					$oCollectedAB->createFile($sUUID . '.vcf', $oVCard->serialize());
 					$bResult = true;
@@ -1320,7 +1320,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @param array $aContactIds
 	 * @return bool
 	 */
@@ -1351,7 +1351,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @param array $aContactIds
 	 * @return bool
 	 */

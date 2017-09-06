@@ -28,7 +28,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iUserId
 	 * @param mixed $mContactId
      *
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function getContactById($iUserId, $mContactId)
 	{
@@ -60,7 +60,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param mixed $mTypeId
 	 * @param int $iContactType
      *
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function GetContactByTypeId($mTypeId, $iContactType)
 	{
@@ -92,7 +92,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iUserId
 	 * @param string $sEmail
      *
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function getContactByEmail($iUserId, $sEmail)
 	{
@@ -125,7 +125,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param string $sContactStrId
 	 * @param int $iSharedTenantId. Default value is **null**
      *
-	 * @return CContact
+	 * @return \Aurora\Modules\Contacts\Classes\Contact
 	 */
 	public function getContactByStrId($iUserId, $sContactStrId, $iSharedTenantId = null)
 	{
@@ -204,7 +204,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 	
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 *
 	 * @return array|bool
 	 */
@@ -228,7 +228,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iUserId
 	 * @param mixed $mGroupId
 	 *
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupById($iUserId, $mGroupId)
 	{
@@ -250,7 +250,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iUserId
 	 * @param string $sGroupStrId
 	 *
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupByStrId($iUserId, $sGroupStrId)
 	{
@@ -272,7 +272,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iUserId
 	 * @param string $sName
 	 *
-	 * @return CGroup
+	 * @return \Aurora\Modules\Contacts\Classes\Group
 	 */
 	public function getGroupByName($iUserId, $sName)
 	{
@@ -291,7 +291,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 *
 	 * @return bool
 	 */
@@ -324,7 +324,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 	
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 * @param int $iUserId
 	 *
 	 * @return string
@@ -358,7 +358,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}	
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @return bool
 	 */
 	public function updateGroup($oGroup)
@@ -439,7 +439,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iIdGroup
 	 * @return boolean
 	 */
-	public function getContactItems($iSortField = \EContactSortField::Email, $iSortOrder = \Aurora\System\Enums\SortOrder::ASC,
+	public function getContactItems($iSortField = \Aurora\Modules\Contacts\Enums\SortField::Email, $iSortOrder = \Aurora\System\Enums\SortOrder::ASC,
 		$iOffset = 0, $iRequestLimit = 20, $aFilters = array(), $iIdGroup = 0)
 	{
 		$mResult = false;
@@ -480,7 +480,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	/**
 	 * @param int $iUserId
 	 *
-	 * @return CContact|null
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|null
 	 */
 	public function GetMyGlobalContact($iUserId)
 	{
@@ -512,7 +512,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 
 	/**
 	 * @param int $iUserId
-	 * @param int $iSortField Default value is **EContactSortField::Name 1**,
+	 * @param int $iSortField Default value is **\Aurora\Modules\Contacts\Enums\SortField::Name 1**,
 	 * @param int $iSortOrder Default value is **\Aurora\System\Enums\SortOrder::ASC 0**,
 	 * @param int $iOffset Default value is **0**
 	 * @param int $iRequestLimit Default value is **20**
@@ -523,7 +523,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @return bool|array
 	 */
 	public function getGroupItems($iUserId,
-		$iSortField = \EContactSortField::Name, $iSortOrder = \Aurora\System\Enums\SortOrder::ASC,
+		$iSortField = \Aurora\Modules\Contacts\Enums\SortField::Name, $iSortOrder = \Aurora\System\Enums\SortOrder::ASC,
 		$iOffset = 0, $iRequestLimit = 20, $sSearch = '', $sFirstCharacter = '', $iContactId = 0)
 	{
 		$mResult = false;
@@ -533,7 +533,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 				$iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $iContactId);
 			//TODO add ability to find by firs character
 //			$mResult = $this->oEavManager->getObjects(
-//				'CContact', 
+//				'\Aurora\Modules\Contacts\Classes\Contact', 
 //				array(
 //					'Name'
 //				),
@@ -575,7 +575,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 
 	/**
-	 * @param CContact $oContact
+	 * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
 	 *
 	 * @return bool
 	 */
@@ -608,7 +608,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 *
 	 * @return bool
 	 */
@@ -795,7 +795,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @param array $aContactIds
 	 *
 	 * @return bool
@@ -816,7 +816,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 
 	/**
-	 * @param CGroup $oGroup
+	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @param array $aContactIds
 	 *
 	 * @return bool
@@ -900,7 +900,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	 * @param int $iUserId
 	 * @param mixed $mContactId
 	 *
-	 * @return CContact|bool
+	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
 	public function GetGlobalContactById($iUserId, $mContactId)
 	{
