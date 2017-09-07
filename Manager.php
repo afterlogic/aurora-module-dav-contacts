@@ -15,9 +15,9 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	/**
 	 * Creates a new instance of the object.
 	 *
-	 * @param \Aurora\System\Managers\GlobalManager &$oManager
+	 * @param \Aurora\System\Module\AbstractModule $oModule
 	 */
-	public function __construct($sForcedStorage = '', \Aurora\System\Module\AbstractModule $oModule = null)
+	public function __construct(\Aurora\System\Module\AbstractModule $oModule = null)
 	{
 		parent::__construct($oModule, new Storages\Sabredav\Storage($this));
 	}
