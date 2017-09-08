@@ -10,7 +10,7 @@
 
 namespace Aurora\Modules\DavContacts\Storages;
 
-class Storage extends \Aurora\System\Managers\AbstractManagerStorage
+class Storage extends \Aurora\System\Managers\AbstractStorage
 {
 	/**
 	 * @param int $iUserId

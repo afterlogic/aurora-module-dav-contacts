@@ -34,7 +34,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 //	protected $AccountsCache;
 
 	/**
-	 * @param \Aurora\System\Managers\GlobalManager &$oManager
+	 * 
+	 * @param \Aurora\System\Managers\AbstractManager $oManager
 	 */
 	public function __construct(\Aurora\System\Managers\AbstractManager &$oManager)
 	{
