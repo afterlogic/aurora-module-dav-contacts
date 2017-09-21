@@ -141,7 +141,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterCreateContact(&$aArgs, &$aResult)
 	{
-		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__)
+		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ && isset($aArgs["Contact"]["Storage"]) && $aArgs["Contact"]["Storage"] === "personal")
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 			$sUUID = isset($aResult) ? $aResult : false;

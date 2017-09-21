@@ -51,16 +51,16 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		$this->GroupsCache = array();
 //		$this->AccountsCache = array();
 
-//		$this->ApiUsersManager =\Aurora\System\Api::GetSystemManager('users');
+		$this->CoreModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Core');
 	}
 
 	/**
 	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
 	 */
-	public function InitByAccount()
+	public function InitByUser($oUser = null)
 	{
 		$bResult = false;
-		$oUser = \Aurora\System\Api::getAuthenticatedUser();
+
 //		if ($oAccount && (!$this->Account || $this->Account->Email !== $oAccount->Email))
 		if ($oUser)
 		{
@@ -113,7 +113,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	public function init($iUserId)
 	{
 //		$oAccount = $this->GetDefaultAccountByUserId($iUserId);
-		return $this->InitByAccount();
+		$oUser = $this->CoreModuleDecorator->getUser($iUserId);
+		return $this->InitByUser($oUser);
 	}
 
 	/**
@@ -1296,7 +1297,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	public function clearAllContactsAndGroups($oAccount)
 	{
 		$bResult = false;
-		$this->InitByAccount();
+		$oUser = $this->CoreModuleDecorator->getUser($oAccount->IdUser);
+		$this->InitByUser($oUser);
 
 		$oAddressBooks = new \Sabre\CardDAV\UserAddressBooks(
 			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
