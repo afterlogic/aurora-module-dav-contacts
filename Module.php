@@ -42,7 +42,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	/**
 	 * 
-	 * @param int $iUserId
+	 * @param int $UserId
 	 * @param string $VCard
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
