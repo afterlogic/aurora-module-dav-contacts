@@ -6,7 +6,7 @@
 		"afterlogic/aurora-framework": "~0.7",
 		"afterlogic/aurora-module-dav": "~0.7",
 		"afterlogic/dav": "^2.0.5",
-		"sabre/dav": "3.0.*"
+		"sabre/dav": "3.1.*"
 	},
 	"extra": {
 		"installer-name": "DavContacts"
