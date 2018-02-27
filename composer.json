@@ -3,8 +3,8 @@
 	"type": "aurora-module",
 	"require":{
 		"php":">=5.4.0",
-		"afterlogic/aurora-framework": "~0.7",
-		"afterlogic/aurora-module-dav": "~0.7",
+		"afterlogic/aurora-framework": "~0.8",
+		"afterlogic/aurora-module-dav": "~0.8",
 		"afterlogic/dav": "^2.0.5",
 		"sabre/dav": "3.1.*"
 	},
