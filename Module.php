@@ -82,60 +82,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	}	
 	
 	/**
-	 * 
-	 * @param type $UserId
-	 * @param type $UUID
-	 * @param type $Storage
-	 * @param type $FileName
-	 */
-	public function SaveContactAsTempFile($UserId, $UUID, $Storage, $FileName)
-	{
-		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-
-		$mResult = false;
-		$sVCardData = null;
-				
-		if ($Storage === 'team')
-		{
-			$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($UUID);
-			
-			$oVCard = new \Sabre\VObject\Component\VCard();
-			\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
-			$sVCardData = $oVCard->serialize();
-		}
-		else
-		{
-			$sVCardData = $this->oApiContactsManager->getVCardObjectById($UserId, $UUID);
-		}
-		if ($sVCardData)
-		{
-			$sUUID = \Aurora\System\Api::getUserUUIDById($UserId);
-			try
-			{
-				$sMimeType = 'text/vcard';
-				$sTempName = md5($sUUID.$UUID);
-				$oApiFileCache = new \Aurora\System\Managers\Filecache();
-
-				if (!$oApiFileCache->isFileExists($sUUID, $sTempName))
-				{
-					$oApiFileCache->put($sUUID, $sTempName, $sVCardData);
-				}
-
-				if ($oApiFileCache->isFileExists($sUUID, $sTempName))
-				{
-					$mResult = \Aurora\System\Utils::GetClientFileResponse($UserId, $FileName, $sTempName, $oApiFileCache->fileSize($sUUID, $sTempName));
-				}
-			}
-			catch (\Exception $oException)
-			{
-				throw new \Aurora\System\Exceptions\ApiException(\Aurora\System\Notifications::MailServerError, $oException);
-			}
-		}
-		
-		return $mResult;		
-	}	
-
-	/**
 	 * @param array $aArgs
 	 * @param array $aResult
 	 */
