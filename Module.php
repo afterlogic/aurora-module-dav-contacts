@@ -174,7 +174,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aArgs['Contact']['UUID']);
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
-					$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->UUID.'.vcf');
+					$oDavContact = $this->oApiContactsManager->getContactById($aArgs['UserId'], $oContact->UUID);
 					if ($oDavContact)
 					{
 						if (!$this->oApiContactsManager->updateContact($oContact))

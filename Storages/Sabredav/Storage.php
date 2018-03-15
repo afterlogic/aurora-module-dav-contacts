@@ -134,7 +134,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			$sVCardData = $oContactItem->get();
 			if ($sVCardData)
 			{
-				$oContact = new \Aurora\Modules\Contacts\Classes\Contact();
+				$oContact = new \Aurora\Modules\Contacts\Classes\Contact('Contacts');
 				$oContact->InitFromVCardStr($iUserId, $sVCardData);
 				$oContact->IdContact = $mContactId;
 				$oContact->ETag = trim($oContactItem->getETag(), '"');
@@ -1187,7 +1187,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				if ($mFindContact === false)
 				{
 					$sUUID = \Sabre\DAV\UUIDUtil::getUUID();
-					$oContact = new \Aurora\Modules\Contacts\Classes\Contact();
+					$oContact = new \Aurora\Modules\Contacts\Classes\Contact('Contacts');
 					$oContact->FullName = $sName;
 					$oContact->PersonalEmail = $sEmail;
 					$oContact->UUID = $sUUID;

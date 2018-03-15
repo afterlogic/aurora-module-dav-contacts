@@ -311,14 +311,15 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 			$this->setLastException($oException);
 		}
 
-		if ($bResult)
-		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-			if ($oApiVoiceManager)
-			{
-				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
-			}
-		}
+//		TODO: a.ovcharov@gmail.com
+//		if ($bResult)
+//		{
+//			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
+//			if ($oApiVoiceManager)
+//			{
+//				$oApiVoiceManager->flushCallersNumbersCache($oContact->IdUser);
+//			}
+//		}
 
 		return $bResult;
 	}
