@@ -1293,16 +1293,15 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	}
 
 	/**
-	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
+	 * @param int $iUserId
 	 * @return bool
 	 */
-	public function clearAllContactsAndGroups($oAccount)
+	public function clearAllContactsAndGroups($iUserId)
 	{
 		$bResult = false;
-		$oUser = $this->CoreModuleDecorator->getUser($oAccount->IdUser);
-		$this->InitByUser($oUser);
+		$this->init($iUserId);
 
-		$oAddressBooks = new \Sabre\CardDAV\UserAddressBooks(
+		$oAddressBooks = new \Sabre\CardDAV\AddressBookHome(
 			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
 
 		foreach ($oAddressBooks->getChildren() as $oAddressBook)

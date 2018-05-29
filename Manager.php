@@ -750,30 +750,22 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	}
 
 	/**
-	 * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
+	 * @param int $iUserId
 	 *
 	 * @return bool
 	 */
-	public function clearAllContactsAndGroups($oAccount)
+	public function clearAllContactsAndGroups($iUserId)
 	{
-		$bResult = false;
-		try
-		{
-			$bResult = $this->oStorage->clearAllContactsAndGroups($oAccount);
-		}
-		catch (\Aurora\System\Exceptions\BaseException $oException)
-		{
-			$bResult = false;
-			$this->setLastException($oException);
-		}
+		$bResult = $this->oStorage->clearAllContactsAndGroups($iUserId);
 
 		if ($bResult)
 		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-			if ($oApiVoiceManager)
-			{
-				$oApiVoiceManager->flushCallersNumbersCache($oAccount->IdUser);
-			}
+			//TODO: add subscription in Twilio
+//			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
+//			if ($oApiVoiceManager)
+//			{
+//				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
+//			}
 		}
 
 		return $bResult;
@@ -1034,6 +1026,5 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		}
 		return $bResult;
 	}	
-	
 }
 

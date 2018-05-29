@@ -39,6 +39,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
+		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
 	}
 	
 	/**
@@ -206,5 +207,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterRemoveContactsFromGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-	}	
+	}
+
+	public function onBeforeDeleteUser(&$aArgs, &$mResult)
+	{
+		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
+		$this->oApiContactsManager->clearAllContactsAndGroups($aArgs['UserId']);
+	}
 }
