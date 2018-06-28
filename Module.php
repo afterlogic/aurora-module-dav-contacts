@@ -186,7 +186,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param array $aArgs
 	 * @param array $aResult
 	 */
-	public function onDeleteGroup(&$aArgs, &$aResult)
+	public function onAfterDeleteGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
