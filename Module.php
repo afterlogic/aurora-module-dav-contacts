@@ -94,15 +94,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oContactsDecorator = \Aurora\Modules\Contacts\Module::Decorator();
 		
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
-		$aGroupNames = [];
-		if (isset($oVCard->CATEGORIES))
-		{
-			foreach ($oVCard->CATEGORIES as $sCategory)
-			{
-				$aGroupNames[] = (string) $sCategory;
-			}
-			$aContactData['GroupNames'] = $aGroupNames;
-		}
 		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
@@ -137,16 +128,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
-		
-		$aGroupNames = [];
-		if (isset($oVCard->CATEGORIES))
-		{
-			foreach ($oVCard->CATEGORIES as $sCategory)
-			{
-				$aGroupNames[] = (string) $sCategory;
-			}
-			$aContactData['GroupNames'] = $aGroupNames;
-		}
 
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
 		$oContact = $this->getContact($UUID);
@@ -155,6 +136,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oEavManager = new \Aurora\System\Managers\Eav();
 			$oContact->populate($aContactData);
 			$mResult = $oEavManager->saveEntity($oContact);
+			if ($mResult)
+			{
+				\Aurora\System\Api::GetModule('Contacts')->oApiContactsManager->updateContactGroups($oContact);
+			}
 		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 		
