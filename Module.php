@@ -22,6 +22,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		'Contacts'
 	);
 	
+	protected $_oldGroup = null;
+	
 	protected $__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
 	protected $__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 
@@ -29,18 +31,53 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->oApiContactsManager = new Manager($this);
 		
+		$this->extendObject(
+			'Aurora\\Modules\\Contacts\\Classes\\Contact',
+			[
+				'UID' => ['string', '']
+			]
+		);		
+		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
 		$this->subscribeEvent('Contacts::DeleteContacts::after', array($this, 'onAfterDeleteContacts'));
 
 		$this->subscribeEvent('Contacts::CreateGroup::after', array($this, 'onAfterCreateGroup'));
+		
+		$this->subscribeEvent('Contacts::UpdateGroup::before', array($this, 'onBeforeUpdateGroup'));
 		$this->subscribeEvent('Contacts::UpdateGroup::after', array($this, 'onAfterUpdateGroup'));
+		
+		$this->subscribeEvent('Contacts::DeleteGroup::before', array($this, 'onBeforDeleteGroup'));
 		$this->subscribeEvent('Contacts::DeleteGroup::after', array($this, 'onAfterDeleteGroup'));
 
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
 	}
+	
+	/**
+	 * 
+	 * @param type $sUID
+	 */
+	protected function getContact($sUID)
+	{
+		$mResult = false;
+		
+		$oEavManager = new \Aurora\System\Managers\Eav();
+		$aEntities = $oEavManager->getEntities(
+			'Aurora\\Modules\\Contacts\\Classes\\Contact', 
+			[], 
+			0, 
+			1,
+			[$this->GetName() . '::UID' => $sUID]
+		);
+		if (is_array($aEntities) && count($aEntities) > 0)
+		{
+			$mResult = $aEntities[0];
+		}
+		
+		return $mResult;
+	}	
 	
 	/**
 	 * 
@@ -54,10 +91,35 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
-		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard, $UUID);
+		$oContactsDecorator = \Aurora\Modules\Contacts\Module::Decorator();
+		
+		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
+		$aGroupNames = [];
+		if (isset($oVCard->CATEGORIES))
+		{
+			foreach ($oVCard->CATEGORIES as $sCategory)
+			{
+				$aGroupNames[] = (string) $sCategory;
+			}
+			$aContactData['GroupNames'] = $aGroupNames;
+		}
 		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
-		$mResult = \Aurora\Modules\Contacts\Module::Decorator()->CreateContact($aContactData, $UserId);
+		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
+		if ($mResult)
+		{
+			$oEavManager = new \Aurora\System\Managers\Eav();
+			$oEntity = $oEavManager->getEntity(
+				$mResult,
+				'Aurora\\Modules\\Contacts\\Classes\\Contact'
+			);
+			if ($oEntity)
+			{
+				$oEntity->{$this->GetName() . '::UID'} = $UUID;
+				$oEavManager->saveEntity($oEntity);
+			}
+		}
+		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
 		
 		return $mResult;
@@ -74,10 +136,26 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
-		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard, $UUID);
+		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 		
+		$aGroupNames = [];
+		if (isset($oVCard->CATEGORIES))
+		{
+			foreach ($oVCard->CATEGORIES as $sCategory)
+			{
+				$aGroupNames[] = (string) $sCategory;
+			}
+			$aContactData['GroupNames'] = $aGroupNames;
+		}
+
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
-		$mResult = \Aurora\Modules\Contacts\Module::Decorator()->UpdateContact($aContactData);
+		$oContact = $this->getContact($UUID);
+		if ($oContact)
+		{
+			$oEavManager = new \Aurora\System\Managers\Eav();
+			$oContact->populate($aContactData);
+			$mResult = $oEavManager->saveEntity($oContact);
+		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 		
 		return $mResult;
@@ -98,6 +176,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
+					$oContact->{$this->GetName() . '::UID'} = $sUUID;
+					$oEavManager = new \Aurora\System\Managers\Eav();
+					$oEavManager->saveEntity($oContact);
 					if (!$this->oApiContactsManager->createContact($oContact))
 					{
 						$aResult = false;
@@ -123,7 +204,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$UserId = \Aurora\System\Api::getAuthenticatedUserId();
-					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->UUID);
+					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{$this->GetName() . '::UID'});
 					if ($oDavContact)
 					{
 						if (!$this->oApiContactsManager->updateContact($oContact))
@@ -172,7 +253,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 	}
-	
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -180,15 +261,35 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterUpdateGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		$aContacts = \Aurora\Modules\Contacts\Module::Decorator()->GetContacts('all', 0, 0, \Aurora\Modules\Contacts\Enums\SortField::Name, \Aurora\System\Enums\SortOrder::ASC, '', $aArgs['Group']['UUID']);
+		if (isset($aContacts['List']) && is_array($aContacts['List']) && count($aContacts['List']))
+		{
+			foreach ($aContacts['List'] as $aContact)
+			{
+				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aContact['UUID']);
+				$this->oApiContactsManager->updateContact($oContact);
+			}
+		}
 	}	
-	
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
 	 */
-	public function onDeleteGroup(&$aArgs, &$aResult)
+	public function onAfterDeleteGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		$aContacts = \Aurora\Modules\Contacts\Module::Decorator()->GetContacts('all', 0, 0, \Aurora\Modules\Contacts\Enums\SortField::Name, \Aurora\System\Enums\SortOrder::ASC, '', $aArgs['UUID']);
+		if (isset($aContacts['List']) && is_array($aContacts['List']) && count($aContacts['List']))
+		{
+			foreach ($aContacts['List'] as $aContact)
+			{
+				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aContact['UUID']);
+				$this->oApiContactsManager->updateContact($oContact);
+			}
+		}
 	}
 	
 	/**
@@ -198,6 +299,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterAddContactsToGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+		
+		$ContactUUIDs = $aArgs['ContactUUIDs'];
+		foreach ($ContactUUIDs as $sUUID)
+		{
+			$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
+			if ($oContact)
+			{
+				$this->oApiContactsManager->updateContact($oContact);
+			}
+		}
 	}
 	
 	/**
@@ -207,6 +318,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterRemoveContactsFromGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		$ContactUUIDs = $aArgs['ContactUUIDs'];
+		foreach ($ContactUUIDs as $sUUID)
+		{
+			$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
+			if ($oContact)
+			{
+				$this->oApiContactsManager->updateContact($oContact);
+			}
+		}
 	}
 
 	public function onBeforeDeleteUser(&$aArgs, &$mResult)

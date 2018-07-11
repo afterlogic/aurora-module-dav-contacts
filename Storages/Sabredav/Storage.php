@@ -864,7 +864,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		$bResult = false;
 		$iUserId = $oContact->IdUser;
 		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-		$oContactItem = $this->geItem($iUserId, $oAddressBook, $oContact->UUID . '.vcf');
+		$oContactItem = $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf');
 		if ($oContactItem)
 		{
 			$sData = $oContactItem->get();
@@ -1004,12 +1004,12 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
 			if ($oAddressBook)
 			{
-				$oContact->UUID .= '.vcf';
+				$oContact->{'DavContacts::UID'} .= '.vcf';
 
 				$oVCard = new \Sabre\VObject\Component\VCard();
 				\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
 
-				$oAddressBook->createFile($oContact->UUID, $oVCard->serialize());
+				$oAddressBook->createFile($oContact->{'DavContacts::UID'}, $oVCard->serialize());
 				$bResult = true;
 			}
 /*
@@ -1192,7 +1192,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 					$oContact = new \Aurora\Modules\Contacts\Classes\Contact('Contacts');
 					$oContact->FullName = $sName;
 					$oContact->PersonalEmail = $sEmail;
-					$oContact->UUID = $sUUID;
+					$oContact->{'DavContacts::UID'} = $sUUID;
 
 					$oVCard = new \Sabre\VObject\Component\VCard();
 					$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';
