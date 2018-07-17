@@ -863,7 +863,14 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	{
 		$bResult = false;
 		$iUserId = $oContact->IdUser;
-		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+		if ($oContact->Storage === 'personal')
+		{
+			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+		}
+		else if ($oContact->Storage === 'shared')
+		{
+			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
+		}
 		$oContactItem = $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf');
 		if ($oContactItem)
 		{
@@ -888,6 +895,32 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
 		return $bResult;
 	}
+	
+	/**
+	 * @param int $iUserId
+	 * @param string $sUID
+	 * @param string $sFromAddressBook
+	 * @param string $sToAddressBook
+	 * @return bool
+	 */
+	public function copyContact($iUserId, $sUID, $sFromAddressBook, $sToAddressBook)
+	{
+		$oFromAddressBook = $this->getAddressBook($iUserId, $sFromAddressBook);
+		$oToAddressBook = $this->getAddressBook($iUserId, $sToAddressBook);
+		
+		$sId = $sUID . '.vcf';
+		if ($oFromAddressBook->childExists($sUID . '.vcf'))
+		{
+			$oCard = $oFromAddressBook->getChild($sId);
+			if ($oCard)
+			{
+				$oToAddressBook->createFile($sId, $oCard->get());
+				$oCard->delete();
+			}
+		}
+		
+		return true;
+	}	
 
 	/**
 	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
@@ -1001,7 +1034,15 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		if (isset($oContact))
 		{
 			$this->init($oContact->IdUser);
-			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+			$oAddressBook = null;
+			if ($oContact->Storage === 'personal')
+			{
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+			}
+			else if ($oContact->Storage === 'shared')
+			{
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
+			}
 			if ($oAddressBook)
 			{
 				$oContact->{'DavContacts::UID'} .= '.vcf';

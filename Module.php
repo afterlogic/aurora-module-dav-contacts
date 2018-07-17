@@ -53,6 +53,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
+		$this->subscribeEvent('Contacts::UpdateSharedContacts::before', array($this, 'onBeforeUpdateSharedContacts'));
 	}
 	
 	/**
@@ -86,7 +87,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function CreateContact($UserId, $VCard, $UUID)
+	public function CreateContact($UserId, $VCard, $UUID, $Storage = 'personal')
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
@@ -94,6 +95,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oContactsDecorator = \Aurora\Modules\Contacts\Module::Decorator();
 		
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
+		$aContactData['Storage'] = $Storage;
 		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
@@ -122,7 +124,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function UpdateContact($VCard, $UUID)
+	public function UpdateContact($VCard, $UUID, $sStorage = 'personal')
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
@@ -135,6 +137,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$oEavManager = new \Aurora\System\Managers\Eav();
 			$oContact->populate($aContactData);
+			$oContact->Storage = $sStorage;
 			$mResult = $oEavManager->saveEntity($oContact);
 			if ($mResult)
 			{
@@ -152,7 +155,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function onAfterCreateContact(&$aArgs, &$aResult)
 	{
-		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ && isset($aArgs["Contact"]["Storage"]) && $aArgs["Contact"]["Storage"] === "personal")
+		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ && isset($aArgs["Contact"]["Storage"]))
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 			$sUUID = isset($aResult) ? $aResult : false;
@@ -320,4 +323,38 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		$this->oApiContactsManager->clearAllContactsAndGroups($aArgs['UserId']);
 	}
+	
+	public function onBeforeUpdateSharedContacts($aArgs, &$mResult)
+	{
+		$oContacts = \Aurora\System\Api::GetModuleDecorator('Contacts');
+		{
+			$aUUIDs = isset($aArgs['UUIDs']) ? $aArgs['UUIDs'] : [];
+			foreach ($aUUIDs as $sUUID)
+			{
+				$oContact = $oContacts->GetContact($sUUID);
+				if ($oContact)
+				{
+					if ($oContact->Storage === 'shared')
+					{
+						$this->oApiContactsManager->copyContact(
+								\Aurora\System\Api::getAuthenticatedUserId(), 
+								$oContact->{'DavContacts' . '::UID'}, 
+								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
+								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME
+						);
+					}
+					else if ($oContact->Storage === 'personal')
+					{
+						$this->oApiContactsManager->copyContact(
+								\Aurora\System\Api::getAuthenticatedUserId(), 
+								$oContact->{'DavContacts' . '::UID'}, 
+								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME, 
+								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME 
+						);
+					}
+				}
+			}
+		}
+	}
+	
 }

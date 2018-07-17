@@ -609,6 +609,22 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 
 		return $bResult;
 	}
+	
+	public function copyContact($iUserId, $sUID, $sFromAddressbook, $sToAddressbook)
+	{
+		$mResult = false;
+		try
+		{
+			$mResult = $this->oStorage->copyContact($iUserId, $sUID, $sFromAddressbook, $sToAddressbook);
+		}
+		catch (\Aurora\System\Exceptions\BaseException $oException)
+		{
+			$mResult = false;
+			$this->setLastException($oException);
+		}
+
+		return $mResult;
+	}
 
 	/**
 	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
