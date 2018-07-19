@@ -97,6 +97,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 		$aContactData['Storage'] = $Storage;
 		
+		\Aurora\System\Api::LogObject($aContactData, \Aurora\System\Enums\LogLevel::Full, 'aaa-');
+		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
 		if ($mResult)
