@@ -94,10 +94,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$oContactsDecorator = \Aurora\Modules\Contacts\Module::Decorator();
 		
+		$bIsAuto = false;
+		if ($Storage === 'collected')
+		{
+			$bIsAuto = true;
+			$Storage = 'personal';
+		}
+		
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 		$aContactData['Storage'] = $Storage;
-		
-		\Aurora\System\Api::LogObject($aContactData, \Aurora\System\Enums\LogLevel::Full, 'aaa-');
 		
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
@@ -110,6 +115,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			);
 			if ($oEntity)
 			{
+				$oEntity->Auto = $bIsAuto;
 				$oEntity->{$this->GetName() . '::UID'} = $UUID;
 				$oEavManager->saveEntity($oEntity);
 			}
@@ -126,7 +132,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function UpdateContact($VCard, $UUID, $sStorage = 'personal')
+	public function UpdateContact($VCard, $UUID, $Storage = 'personal')
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
@@ -137,9 +143,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oContact = $this->getContact($UUID);
 		if ($oContact)
 		{
+			$bIsAuto = false;
+			if ($Storage === 'collected')
+			{
+				$bIsAuto = true;
+				$Storage = 'personal';
+			}
+
 			$oEavManager = new \Aurora\System\Managers\Eav();
 			$oContact->populate($aContactData);
-			$oContact->Storage = $sStorage;
+			$oContact->Storage = $Storage;
 			$mResult = $oEavManager->saveEntity($oContact);
 			if ($mResult)
 			{
