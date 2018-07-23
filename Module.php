@@ -80,6 +80,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;
 	}	
 	
+	protected function getGroupsContacts($sUUID)
+	{
+		$oEavManager = new \Aurora\System\Managers\Eav();
+		return $oEavManager->getEntities(
+			'Aurora\\Modules\\Contacts\\Classes\\GroupContact',
+			['GroupUUID', 'ContactUUID'], 0, 0, ['ContactUUID' => $sUUID]);		
+	}
+	
 	/**
 	 * 
 	 * @param int $UserId
@@ -140,7 +148,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
+		/* @var $oContact \Aurora\Modules\Contacts\Classes\Contact */
 		$oContact = $this->getContact($UUID);
+		$aGroupsContacts = $this->getGroupsContacts($oContact->UUID);
+		
 		if ($oContact)
 		{
 			$bIsAuto = false;
@@ -157,6 +168,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($mResult)
 			{
 				\Aurora\System\Api::GetModule('Contacts')->oApiContactsManager->updateContactGroups($oContact);
+				
+				$oContactsModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Contacts');
+
+				foreach ($aGroupsContacts as $oGroupsContact)
+				{
+					$aContacts = $oContactsModuleDecorator->GetContacts('all', 0, 0, \Aurora\Modules\Contacts\Enums\SortField::Name, \Aurora\System\Enums\SortOrder::ASC, '', $oGroupsContact->GroupUUID);
+					if (isset($aContacts['ContactCount']) && (int) $aContacts['ContactCount'] === 0)
+					{
+						$oContactsModuleDecorator->DeleteGroup($oGroupsContact->GroupUUID);
+					}
+				}
 			}
 		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
