@@ -277,6 +277,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterCreateGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
+
+		$aContacts = $aArgs['Group']['Contacts'];
+		if (is_array($aContacts) && count($aContacts) > 0)
+		{
+			foreach ($aContacts as $sUUID)
+			{
+				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
+				if ($oContact)
+				{
+					$this->oApiContactsManager->updateContact($oContact);
+				}
+			}
+		}
 	}
 
 	/**
@@ -307,6 +320,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
 		$aContacts = \Aurora\Modules\Contacts\Module::Decorator()->GetContacts('all', 0, 0, \Aurora\Modules\Contacts\Enums\SortField::Name, \Aurora\System\Enums\SortOrder::ASC, '', $aArgs['UUID']);
+		
 		if (isset($aContacts['List']) && is_array($aContacts['List']) && count($aContacts['List']))
 		{
 			foreach ($aContacts['List'] as $aContact)
