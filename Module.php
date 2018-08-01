@@ -60,7 +60,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * 
 	 * @param type $sUID
 	 */
-	protected function getContact($sUID)
+	protected function getContact($iUserId, $sStorage, $sUID)
 	{
 		$mResult = false;
 		
@@ -70,7 +70,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 			[], 
 			0, 
 			1,
-			[$this->GetName() . '::UID' => $sUID]
+			[
+				'IdUser' => $iUserId,
+				'Storage' => $sStorage,
+				$this->GetName() . '::UID' => $sUID
+			]
 		);
 		if (is_array($aEntities) && count($aEntities) > 0)
 		{
@@ -140,7 +144,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function UpdateContact($VCard, $UUID, $Storage = 'personal')
+	public function UpdateContact($UserId, $VCard, $UUID, $Storage = 'personal')
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
@@ -149,7 +153,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
 		/* @var $oContact \Aurora\Modules\Contacts\Classes\Contact */
-		$oContact = $this->getContact($UUID);
+		$oContact = $this->getContact($UserId, $Storage, $UUID);
 		$aGroupsContacts = $this->getGroupsContacts($oContact->UUID);
 		
 		if ($oContact)
