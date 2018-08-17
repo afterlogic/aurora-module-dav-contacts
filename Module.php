@@ -54,6 +54,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
 		$this->subscribeEvent('Contacts::UpdateSharedContacts::before', array($this, 'onBeforeUpdateSharedContacts'));
+		
+		$this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
 	}
 	
 	/**
@@ -282,7 +284,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
-		$aContacts = $aArgs['Group']['Contacts'];
+		$aContacts = isset($aArgs['Group']['Contacts']) ? $aArgs['Group']['Contacts'] : [];
 		if (is_array($aContacts) && count($aContacts) > 0)
 		{
 			foreach ($aContacts as $sUUID)
@@ -411,5 +413,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 			}
 		}
 	}
+	
+    public function onGetMobileSyncInfo($aArgs, &$mResult)
+	{
+		$oDavModule = \Aurora\Modules\Dav\Module::Decorator();
+
+		$sDavServer = $oDavModule->GetServerUrl();
+		
+		$mResult['Dav']['Contacts'] = array(
+			'PersonalContactsUrl' => $sDavServer.'/addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
+			'CollectedAddressesUrl' => $sDavServer.'/addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
+			'SharedWithAllUrl' => $sDavServer.'/addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
+			'TeamAddressBookUrl' => $sDavServer.'/gab'
+		);
+	}	
 	
 }
