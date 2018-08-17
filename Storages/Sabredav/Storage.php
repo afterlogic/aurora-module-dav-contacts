@@ -267,7 +267,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		{
 			if (!isset($this->aAddressBooksCache[$iUserId][$sName]))
 			{
-				$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookHome(
+				$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
 					\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
 
 				if ($oUserAddressBooks->childExists($sName))
@@ -1349,7 +1349,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		$bResult = false;
 		$this->init($iUserId);
 
-		$oAddressBooks = new \Sabre\CardDAV\AddressBookHome(
+		$oAddressBooks = new \Sabre\CardDAV\AddressBookRoot(
 			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
 
 		foreach ($oAddressBooks->getChildren() as $oAddressBook)
