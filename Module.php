@@ -40,7 +40,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
-		$this->subscribeEvent('Contacts::DeleteContacts::after', array($this, 'onAfterDeleteContacts'));
+		$this->subscribeEvent('Contacts::DeleteContacts::before', array($this, 'onBeforeDeleteContacts'));
 
 		$this->subscribeEvent('Contacts::CreateGroup::after', array($this, 'onAfterCreateGroup'));
 		
@@ -259,15 +259,28 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param array $aArgs
 	 * @param array $aResult
 	 */
-	public function onAfterDeleteContacts(&$aArgs, &$aResult)
+	public function onBeforeDeleteContacts(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
-		if ($aResult && isset($aArgs['UUIDs']))
+		if (isset($aArgs['UUIDs']))
 		{
+			$oEavManager = new \Aurora\System\Managers\Eav();
+			$aEntities = $oEavManager->getEntities(
+				'Aurora\\Modules\\Contacts\\Classes\\Contact', 
+				['DavContacts::UID'], 
+				0, 
+				0,
+				['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']]
+			);
+			$aUIDs = [];
+			foreach ($aEntities as $oContact)
+			{
+				$aUIDs[] = $oContact->{'DavContacts::UID'};
+			}
 			if (!$this->oApiContactsManager->deleteContacts(
 				\Aurora\System\Api::getAuthenticatedUserId(),
-				$aArgs['UUIDs'])
+				$aUIDs)
 			)
 			{
 				$aResult = false;
