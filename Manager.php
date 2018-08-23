@@ -32,12 +32,12 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      *
 	 * @return \Aurora\Modules\Contacts\Classes\Contact|bool
 	 */
-	public function getContactById($iUserId, $mContactId)
+	public function getContactById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
 		$oContact = null;
 		try
 		{
-			$oContact = $this->oStorage->getContactById($iUserId, $mContactId);
+			$oContact = $this->oStorage->getContactById($iUserId, $mContactId, $sAddressBookName);
 			if ($oContact)
 			{
 				$mGroupIds = $this->getContactGroupIds($oContact);

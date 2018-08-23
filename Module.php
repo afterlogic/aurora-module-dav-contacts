@@ -156,10 +156,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
 		/* @var $oContact \Aurora\Modules\Contacts\Classes\Contact */
 		$oContact = $this->getContact($UserId, $Storage, $UUID);
-		$aGroupsContacts = $this->getGroupsContacts($oContact->UUID);
 		
 		if ($oContact)
 		{
+			$aGroupsContacts = $this->getGroupsContacts($oContact->UUID);
 			$bIsAuto = false;
 			if ($Storage === 'collected')
 			{
@@ -235,6 +235,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$UserId = \Aurora\System\Api::getAuthenticatedUserId();
+					
+					
+					
 					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{$this->GetName() . '::UID'});
 					if ($oDavContact)
 					{
