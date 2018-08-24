@@ -148,6 +148,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	public function UpdateContact($UserId, $VCard, $UUID, $Storage = 'personal')
 	{
+		$mResult = false;
+		
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
