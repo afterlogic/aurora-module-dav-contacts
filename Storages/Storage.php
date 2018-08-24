@@ -263,7 +263,7 @@ class Storage extends \Aurora\System\Managers\AbstractStorage
 	 * @param array $aContactIds
 	 * @return bool
 	 */
-	public function deleteContacts($iUserId, $aContactIds)
+	public function deleteContacts($iUserId, $aContactIds, $sAddressBook = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
 		return true;
 	}

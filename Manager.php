@@ -652,16 +652,15 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	/**
 	 * @param int $iUserId
 	 * @param array $aContactIds
-	 * @param int $iTenantId Default value is **null**
 	 *
 	 * @return bool
 	 */
-	public function deleteContacts($iUserId, $aContactIds, $iTenantId = null)
+	public function deleteContacts($iUserId, $aContactIds, $sAddressBook = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->deleteContacts($iUserId, $aContactIds, $iTenantId);
+			$bResult = $this->oStorage->deleteContacts($iUserId, $aContactIds, $sAddressBook);
 		}
 		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{

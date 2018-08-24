@@ -291,19 +291,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oEavManager = new \Aurora\System\Managers\Eav();
 			$aEntities = $oEavManager->getEntities(
 				'Aurora\\Modules\\Contacts\\Classes\\Contact', 
-				['DavContacts::UID'], 
+				['DavContacts::UID', 'Storage'], 
 				0, 
 				0,
 				['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']]
 			);
 			$aUIDs = [];
+			$sStorage = 'personal';
 			foreach ($aEntities as $oContact)
 			{
 				$aUIDs[] = $oContact->{'DavContacts::UID'};
+				$sStorage = $oContact->Storage;
 			}
 			if (!$this->oApiContactsManager->deleteContacts(
-				\Aurora\System\Api::getAuthenticatedUserId(),
-				$aUIDs)
+					\Aurora\System\Api::getAuthenticatedUserId(),
+					$aUIDs,
+					$this->getStorage($sStorage))
 			)
 			{
 				$aResult = false;

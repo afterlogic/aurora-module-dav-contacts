@@ -1118,10 +1118,10 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 * @param array $aContactIds
 	 * @return bool
 	 */
-	public function deleteContacts($iUserId, $aContactIds)
+	public function deleteContacts($iUserId, $aContactIds, $sAddressBook = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
 		$this->init($iUserId);
-		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+		$oAddressBook = $this->getAddressBook($iUserId, $sAddressBook);
 		return $this->deleteContactsByAddressBook($iUserId, $aContactIds, $oAddressBook);
 	}
 
