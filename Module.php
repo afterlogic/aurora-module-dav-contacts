@@ -94,6 +94,25 @@ class Module extends \Aurora\System\Module\AbstractModule
 			['GroupUUID', 'ContactUUID'], 0, 0, ['ContactUUID' => $sUUID]);		
 	}
 	
+	protected function getStorage($sStorage)
+	{
+		$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
+		if ($sStorage === 'personal')
+		{
+			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
+		}
+		else if ($sStorage === 'shared')
+		{
+			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME;
+		}
+		else if ($sStorage === 'collected')
+		{
+			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME;
+		}
+		
+		return $sResult;
+	}	
+	
 	/**
 	 * 
 	 * @param int $UserId
@@ -238,9 +257,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$UserId = \Aurora\System\Api::getAuthenticatedUserId();
 					
+					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{$this->GetName() . '::UID'}, $this->getStorage($aArgs['Contact']['Storage']));
 					
-					
-					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{$this->GetName() . '::UID'});
 					if ($oDavContact)
 					{
 						if (!$this->oApiContactsManager->updateContact($oContact))
