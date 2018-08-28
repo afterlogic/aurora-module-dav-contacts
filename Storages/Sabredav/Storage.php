@@ -1349,7 +1349,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		$bResult = false;
 		$this->init($iUserId);
 
-		$oAddressBooks = new \Sabre\CardDAV\AddressBookRoot(
+		$oAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
 			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
 
 		foreach ($oAddressBooks->getChildren() as $oAddressBook)
