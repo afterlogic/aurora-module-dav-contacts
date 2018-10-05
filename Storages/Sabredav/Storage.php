@@ -1166,9 +1166,9 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
 							if (isset($oVCard->CATEGORIES))
 							{
-								if (strpos($sCategories, $sGroupId) !== false)
+								$aCategories = $oVCard->CATEGORIES->getParts();
+								if (in_array($sGroupId, $aCategories))
 								{
-									$aCategories = $oVCard->CATEGORIES->getParts();
 									$aResultCategories = array();
 									foreach($aCategories as $sCategory)
 									{
@@ -1178,7 +1178,10 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 											$aResultCategories[] = $sCategory;
 										}
 									}
-									$oVCard->CATEGORIES->setValue($aResultCategories);
+									if (count($aResultCategories) > 0)
+									{
+										$oVCard->CATEGORIES->setValue($aResultCategories);
+									}
 									$oContact->put($oVCard->serialize());
 									$this->aContactItemsCache[$sName][$oContact->getName()] = $oContact;
 								}
