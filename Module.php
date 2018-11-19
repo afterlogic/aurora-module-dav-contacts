@@ -31,12 +31,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$this->oApiContactsManager = new Manager($this);
 		
-		$this->extendObject(
-			'Aurora\\Modules\\Contacts\\Classes\\Contact',
+		\Aurora\Modules\Contacts\Classes\Contact::extend(
+			self::GetName(),
 			[
 				'UID' => ['string', '']
 			]
-		);		
+
+		);
 		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
@@ -75,7 +76,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			[
 				'IdUser' => $iUserId,
 				'Storage' => $sStorage,
-				$this->GetName() . '::UID' => $sUID
+				self::GetName() . '::UID' => $sUID
 			]
 		);
 		if (is_array($aEntities) && count($aEntities) > 0)
@@ -149,7 +150,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($oEntity)
 			{
 				$oEntity->Auto = $bIsAuto;
-				$oEntity->{$this->GetName() . '::UID'} = $UUID;
+				$oEntity->{self::GetName() . '::UID'} = $UUID;
 				$oEavManager->saveEntity($oEntity);
 			}
 		}
@@ -228,7 +229,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
-					$oContact->{$this->GetName() . '::UID'} = $sUUID;
+					$oContact->{self::GetName() . '::UID'} = $sUUID;
 					$oEavManager = new \Aurora\System\Managers\Eav();
 					$oEavManager->saveEntity($oContact);
 					if (!$this->oApiContactsManager->createContact($oContact))
@@ -257,7 +258,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$UserId = \Aurora\System\Api::getAuthenticatedUserId();
 					
-					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{$this->GetName() . '::UID'}, $this->getStorage($aArgs['Contact']['Storage']));
+					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{self::GetName() . '::UID'}, $this->getStorage($aArgs['Contact']['Storage']));
 					
 					if ($oDavContact)
 					{
