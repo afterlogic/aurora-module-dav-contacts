@@ -16,7 +16,7 @@ namespace Aurora\Modules\DavContacts;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
-	public $oApiContactsManager = null;
+	public $oManager = null;
 
 	protected $aRequireModules = array(
 		'Contacts'
@@ -27,10 +27,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 	protected $__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
 	protected $__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 
+	public function getManager()
+	{
+		if ($this->oManager === null)
+		{
+			$this->oManager = new Manager($this);
+		}
+
+		return $this->oManager;
+	}
+
 	public function init() 
 	{
-		$this->oApiContactsManager = new Manager($this);
-		
 		\Aurora\Modules\Contacts\Classes\Contact::extend(
 			self::GetName(),
 			[
@@ -67,7 +75,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$mResult = false;
 		
-		$oEavManager = new \Aurora\System\Managers\Eav();
+		$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 		$aEntities = $oEavManager->getEntities(
 			'Aurora\\Modules\\Contacts\\Classes\\Contact', 
 			[], 
@@ -89,7 +97,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	protected function getGroupsContacts($sUUID)
 	{
-		$oEavManager = new \Aurora\System\Managers\Eav();
+		$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 		return $oEavManager->getEntities(
 			'Aurora\\Modules\\Contacts\\Classes\\GroupContact',
 			['GroupUUID', 'ContactUUID'], 0, 0, ['ContactUUID' => $sUUID]);		
@@ -142,7 +150,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
 		if ($mResult)
 		{
-			$oEavManager = new \Aurora\System\Managers\Eav();
+			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$oEntity = $oEavManager->getEntity(
 				$mResult,
 				'Aurora\\Modules\\Contacts\\Classes\\Contact'
@@ -189,13 +197,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$Storage = 'personal';
 			}
 
-			$oEavManager = new \Aurora\System\Managers\Eav();
+			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$oContact->populate($aContactData);
 			$oContact->Storage = $Storage;
 			$mResult = $oEavManager->saveEntity($oContact);
 			if ($mResult)
 			{
-				\Aurora\System\Api::GetModule('Contacts')->oApiContactsManager->updateContactGroups($oContact);
+				\Aurora\System\Api::GetModule('Contacts')->getManager()->updateContactGroups($oContact);
 				
 				$oContactsModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Contacts');
 
@@ -230,9 +238,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$oContact->{self::GetName() . '::UID'} = $sUUID;
-					$oEavManager = new \Aurora\System\Managers\Eav();
+					$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 					$oEavManager->saveEntity($oContact);
-					if (!$this->oApiContactsManager->createContact($oContact))
+					if (!$this->getManager()->createContact($oContact))
 					{
 						$aResult = false;
 					}
@@ -258,18 +266,18 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$UserId = \Aurora\System\Api::getAuthenticatedUserId();
 					
-					$oDavContact = $this->oApiContactsManager->getContactById($UserId, $oContact->{self::GetName() . '::UID'}, $this->getStorage($aArgs['Contact']['Storage']));
+					$oDavContact = $this->getManager()->getContactById($UserId, $oContact->{self::GetName() . '::UID'}, $this->getStorage($aArgs['Contact']['Storage']));
 					
 					if ($oDavContact)
 					{
-						if (!$this->oApiContactsManager->updateContact($oContact))
+						if (!$this->getManager()->updateContact($oContact))
 						{
 							$aResult = false;
 						}
 					}
 					else
 					{
-						if (!$this->oApiContactsManager->createContact($oContact))
+						if (!$this->getManager()->createContact($oContact))
 						{
 							$aResult = false;
 						}
@@ -289,7 +297,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (isset($aArgs['UUIDs']))
 		{
-			$oEavManager = new \Aurora\System\Managers\Eav();
+			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$aEntities = $oEavManager->getEntities(
 				'Aurora\\Modules\\Contacts\\Classes\\Contact', 
 				['DavContacts::UID', 'Storage'], 
@@ -304,7 +312,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aUIDs[] = $oContact->{'DavContacts::UID'};
 				$sStorage = $oContact->Storage;
 			}
-			if (!$this->oApiContactsManager->deleteContacts(
+			if (!$this->getManager()->deleteContacts(
 					\Aurora\System\Api::getAuthenticatedUserId(),
 					$aUIDs,
 					$this->getStorage($sStorage))
@@ -332,7 +340,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
 				if ($oContact)
 				{
-					$this->oApiContactsManager->updateContact($oContact);
+					$this->getManager()->updateContact($oContact);
 				}
 			}
 		}
@@ -352,7 +360,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			foreach ($aContacts['List'] as $aContact)
 			{
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aContact['UUID']);
-				$this->oApiContactsManager->updateContact($oContact);
+				$this->getManager()->updateContact($oContact);
 			}
 		}
 	}	
@@ -372,7 +380,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			foreach ($aContacts['List'] as $aContact)
 			{
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aContact['UUID']);
-				$this->oApiContactsManager->updateContact($oContact);
+				$this->getManager()->updateContact($oContact);
 			}
 		}
 	}
@@ -391,7 +399,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
 			if ($oContact)
 			{
-				$this->oApiContactsManager->updateContact($oContact);
+				$this->getManager()->updateContact($oContact);
 			}
 		}
 	}
@@ -410,7 +418,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
 			if ($oContact)
 			{
-				$this->oApiContactsManager->updateContact($oContact);
+				$this->getManager()->updateContact($oContact);
 			}
 		}
 	}
@@ -418,7 +426,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onBeforeDeleteUser(&$aArgs, &$mResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
-		$this->oApiContactsManager->clearAllContactsAndGroups($aArgs['UserId']);
+		$this->getManager()->clearAllContactsAndGroups($aArgs['UserId']);
 	}
 	
 	public function onBeforeUpdateSharedContacts($aArgs, &$mResult)
@@ -433,7 +441,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					if ($oContact->Storage === 'shared')
 					{
-						$this->oApiContactsManager->copyContact(
+						$this->getManager()->copyContact(
 								\Aurora\System\Api::getAuthenticatedUserId(), 
 								$oContact->{'DavContacts' . '::UID'}, 
 								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
@@ -442,7 +450,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					}
 					else if ($oContact->Storage === 'personal')
 					{
-						$this->oApiContactsManager->copyContact(
+						$this->getManager()->copyContact(
 								\Aurora\System\Api::getAuthenticatedUserId(), 
 								$oContact->{'DavContacts' . '::UID'}, 
 								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME, 
