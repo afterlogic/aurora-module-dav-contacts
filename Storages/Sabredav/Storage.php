@@ -863,6 +863,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	{
 		$bResult = false;
 		$iUserId = $oContact->IdUser;
+		$oAddressBook = null;
 		if ($oContact->Storage === 'personal')
 		{
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
@@ -871,7 +872,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		{
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
 		}
-		$oContactItem = $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf');
+		$oContactItem = $oAddressBook ? $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf') : null;
 		if ($oContactItem)
 		{
 			$sData = $oContactItem->get();
