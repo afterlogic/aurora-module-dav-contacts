@@ -75,8 +75,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			$this->GroupsCache = array();
 
 //			\Afterlogic\DAV\Server::getInstance()->setAccount($oAccount);
-//			$aPrincipalProperties = \Afterlogic\DAV\Backend::Principal()->getPrincipalByPath(\Afterlogic\DAV\Constants::PRINCIPALS_PREFIX . '/' . $oAccount->Email);
-			$aPrincipalProperties = \Afterlogic\DAV\Backend::Principal()->getPrincipalByPath(\Afterlogic\DAV\Constants::PRINCIPALS_PREFIX . '/' . $oUser->PublicId);
+//			$aPrincipalProperties = \Afterlogic\DAV\Backend::Principal()->getPrincipalByPath(\Afterlogic\DAV\Constants::PRINCIPALS_PREFIX . $oAccount->Email);
+			$aPrincipalProperties = \Afterlogic\DAV\Backend::Principal()->getPrincipalByPath(\Afterlogic\DAV\Constants::PRINCIPALS_PREFIX . $oUser->PublicId);
 			if ($aPrincipalProperties)
 			{
 				if (isset($aPrincipalProperties['uri']))
