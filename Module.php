@@ -234,7 +234,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$sUUID = isset($aResult) ? $aResult : false;
 			if ($sUUID)
 			{
-				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($sUUID);
+				$oContact = \Aurora\System\Api::GetModule('Contacts')->GetContact($sUUID);
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$oContact->{self::GetName() . '::UID'} = $sUUID;

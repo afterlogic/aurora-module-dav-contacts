@@ -114,9 +114,15 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 */
 	public function init($iUserId)
 	{
-//		$oAccount = $this->GetDefaultAccountByUserId($iUserId);
-		$oUser = $this->CoreModuleDecorator->getUser($iUserId);
-		return $this->InitByUser($oUser);
+		static $bInitialized = null;
+		if (!isset($bInitialized))
+		{
+	//		$oAccount = $this->GetDefaultAccountByUserId($iUserId);
+			$oUser = $this->CoreModuleDecorator->getUser($iUserId);
+			$bInitialized = $this->InitByUser($oUser);
+		}
+
+		return $bInitialized;
 	}
 
 	/**
@@ -1057,7 +1063,6 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
 				$oVCard = new \Sabre\VObject\Component\VCard();
 				\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
-
 				$oAddressBook->createFile($oContact->{'DavContacts::UID'}, $oVCard->serialize());
 				$bResult = true;
 			}
