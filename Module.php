@@ -65,6 +65,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::UpdateSharedContacts::before', array($this, 'onBeforeUpdateSharedContacts'));
 		
 		$this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
+
+		$this->subscribeEvent('Contacts::GetContactAsVCF::before', array($this, 'onBeforeGetContactAsVCF'));
 	}
 	
 	/**
@@ -77,7 +79,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 		$aEntities = $oEavManager->getEntities(
-			'Aurora\\Modules\\Contacts\\Classes\\Contact', 
+			\Aurora\Modules\Contacts\Classes\Contact::class, 
 			[], 
 			0, 
 			1,
@@ -99,7 +101,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 		return $oEavManager->getEntities(
-			'Aurora\\Modules\\Contacts\\Classes\\GroupContact',
+			\Aurora\Modules\Contacts\Classes\GroupContact::class,
 			['GroupUUID', 'ContactUUID'], 0, 0, ['ContactUUID' => $sUUID]);		
 	}
 	
@@ -153,7 +155,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$oEntity = $oEavManager->getEntity(
 				$mResult,
-				'Aurora\\Modules\\Contacts\\Classes\\Contact'
+				\Aurora\Modules\Contacts\Classes\Contact::class
 			);
 			if ($oEntity)
 			{
@@ -299,7 +301,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$aEntities = $oEavManager->getEntities(
-				'Aurora\\Modules\\Contacts\\Classes\\Contact', 
+				\Aurora\Modules\Contacts\Classes\Contact::class, 
 				['DavContacts::UID', 'Storage'], 
 				0, 
 				0,
@@ -475,5 +477,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 			'TeamAddressBookUrl' => $sDavServer.'gab'
 		);
 	}	
+
+	public function onBeforeGetContactAsVCF($aArgs, &$mResult)
+	{
+		$oContact = $aArgs['Contact'];
+		if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
+		{
+			$mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->UUID);
+
+			return true;
+		}
+	}
 	
 }
