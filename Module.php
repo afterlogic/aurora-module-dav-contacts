@@ -235,7 +235,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ && isset($aArgs["Contact"]["Storage"]))
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-			$sUUID = isset($aResult) ? $aResult : false;
+			$sUUID = isset($aResult) && isset($aResult['UUID'])? $aResult['UUID'] : false;
 			if ($sUUID)
 			{
 				$oContact = \Aurora\System\Api::GetModule('Contacts')->GetContact($sUUID);
