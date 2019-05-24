@@ -33,6 +33,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	protected $aContactItemsCache;
 	protected $aGroupItemsCache;
 	protected $ContactsCache;
+	protected $InitialisedUserId;
 //	protected $AccountsCache;
 
 	/**
@@ -114,11 +115,12 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 */
 	public function init($iUserId)
 	{
-		static $bInitialized = null;
-		if (!isset($bInitialized))
+		$bInitialized = true;
+		if ($this->InitialisedUserId !== $iUserId)
 		{
 	//		$oAccount = $this->GetDefaultAccountByUserId($iUserId);
 			$oUser = $this->CoreModuleDecorator->getUser($iUserId);
+			$this->InitialisedUserId = $iUserId;
 			$bInitialized = $this->InitByUser($oUser);
 		}
 
