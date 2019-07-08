@@ -566,7 +566,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		$mResult = false;
 		try
 		{
-			$mResult = array(); // ЕЩВЩ
+			$mResult = array(); // TODO
 		}
 		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
