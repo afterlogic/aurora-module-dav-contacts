@@ -119,7 +119,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		if ($this->InitialisedUserId !== $iUserId)
 		{
 	//		$oAccount = $this->GetDefaultAccountByUserId($iUserId);
-			$oUser = $this->CoreModuleDecorator->getUser($iUserId);
+			$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($iUserId);
 			$this->InitialisedUserId = $iUserId;
 			$bInitialized = $this->InitByUser($oUser);
 		}
