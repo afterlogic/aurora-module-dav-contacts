@@ -280,10 +280,10 @@ class Storage extends \Aurora\System\Managers\AbstractStorage
 
 	/**
 	 * @param int $iUserId
-	 * @param array $aGroupIds
+	 * @param string $iGroupId
 	 * @return bool
 	 */
-	public function deleteGroups($iUserId, $aGroupIds)
+	public function deleteGroup($iUserId, $iGroupId)
 	{
 		return true;
 	}

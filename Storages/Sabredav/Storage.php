@@ -939,97 +939,33 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	{
 		$bResult = false;
 
-		$sGroupId = null;
-		$sGroupName = $oGroup->Name;
+		$oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+		$oGroupItem = $oAddressBook ? $this->geItem($oGroup->IdUser, $oAddressBook, $oGroup->{'DavContacts::UID'} . '.vcf') : null;
+		if ($oGroupItem)
+		{
+			$sData = $oGroupItem->get();
 
-		if (!empty($oGroup->IdGroup))
-		{
-			$sGroupId = $oGroup->IdGroup;
-		}
-		else
-		{
-			$sGroupId = $oGroup->Name;
+			$oVCard = \Sabre\VObject\Reader::read($sData);
+			if ($oVCard)
+			{
+				\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromGroup($oGroup, $oVCard);
+				unset($oVCard->MEMBER);
+				unset($oVCard->{'X-ADDRESSBOOKSERVER-MEMBER'});
+				foreach ($oGroup->GroupContacts as $oGroupContact)
+				{
+					$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
+					if ($oContact)
+					{
+						$oVCard->add('X-ADDRESSBOOKSERVER-MEMBER', 'urn:uuid:' . $oContact->{'DavContacts::VCardUID'});
+					}
+				}		
+		
+				$oGroupItem->put($oVCard->serialize());
+				$bResult = true;
+			}
+			unset($oVCard);
 		}
 
-		if (!empty($sGroupId))
-		{
-			// TODO sasha
-//			$oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-//
-//			if ($oAddressBook)
-//			{
-//				$aContactIds = $oGroup->ContactIds;
-//				foreach ($aContactIds as $sContactId)
-//				{
-//					if ($oAddressBook->childExists($sContactId))
-//					{
-//						$oContact = $oAddressBook->GetChild($sContactId);
-//						$vCard = \Sabre\VObject\Reader::read($oContact->get());
-//
-//						$sCategories = '';
-//						if (isset($vCard->CATEGORIES))
-//						{
-//							$sCategories = $vCard->CATEGORIES->getParts();
-//							$aResultCategories = array();
-//							foreach ($aCategories as $sCategory)
-//							{
-//								if ($sCategory === $sGroupId)
-//								{
-//									$aResultCategories[] = $sGroupName;
-//								}
-//								else
-//								{
-//									$aResultCategories[] = $sCategory;
-//								}
-//							}
-//							if (!in_array($sGroupId, $aResultCategories))
-//							{
-//								$aResultCategories[] = $sGroupName;
-//							}
-//							$sCategories = implode(',', array_unique($aResultCategories));
-//						}
-//						else
-//						{
-//							$vCard->add(new \Sabre\VObject\Property('CATEGORIES'));
-//							$sCategories = $sGroupName;
-//						}
-//
-//						$vCard->CATEGORIES->setValue($sCategories);
-//						$oContact->put($vCard->serialize());
-//					}
-//				}
-//
-//				$aContactIds = $oGroup->DeletedContactIds;
-//				foreach ($aContactIds as $sContactId)
-//				{
-//					if ($oAddressBook->childExists($sContactId))
-//					{
-//						$oContact = $oAddressBook->GetChild($sContactId);
-//						$vCard = \Sabre\VObject\Reader::read($oContact->get());
-//
-//						$aResultCategories = array();
-//						if (isset($vCard->CATEGORIES))
-//						{
-//							$sCategories = (string)$vCard->CATEGORIES;
-//							if (strpos($sCategories, $sGroupId) !== false)
-//							{
-//								$aCategories = $vCard->CATEGORIES->getParts());
-//								foreach($aCategories as $sCategory)
-//								{
-//									if ($oGroup->IdGroup !== $sCategory)
-//									{
-//										$aResultCategories[] = $sCategory;
-//									}
-//								}
-//							}
-//							$vCard->CATEGORIES->setValue(array_unique($aResultCategories));
-//							$oContact->put($vCard->serialize());
-//						}
-//					}
-//				}
-//			}
-			$bResult = true;
-		}
 		return $bResult;
 	}
 
@@ -1089,7 +1025,24 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 */
 	public function createGroup($oGroup)
 	{
-		return $this->updateGroup($oGroup);
+		$oVCard = new \Sabre\VObject\Component\VCard();
+		\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromGroup($oGroup, $oVCard);
+
+		unset($oVCard->{'X-ADDRESSBOOKSERVER-MEMBER'});
+		foreach ($oGroup->GroupContacts as $oGroupContact)
+		{
+			$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
+			if ($oContact)
+			{
+				$oVCard->add('X-ADDRESSBOOKSERVER-MEMBER', 'urn:uuid:' . $oContact->{'DavContacts::VCardUID'});
+			}
+		}		
+
+		$oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+		$oAddressBook->createFile($oGroup->{'DavContacts::UID'} . '.vcf', $oVCard->serialize());
+
+
+		return true; //$this->updateGroup($oGroup);
 	}
 
 	/**
@@ -1147,59 +1100,23 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	
 	/**
 	 * @param int $iUserId
-	 * @param array $aGroupIds
+	 * @param string $aGroupIds
 	 * @return bool
 	 */
-	public function deleteGroups($iUserId, $aGroupIds)
+	public function deleteGroup($iUserId, $iGroupId)
 	{
 		$this->init($iUserId);
 
 		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-		$sName = $oAddressBook->getName();
 		if ($oAddressBook)
 		{
-			$this->getItems($iUserId, $oAddressBook);
-
-			foreach($aGroupIds as $sGroupId)
+			if ($oAddressBook->childExists($iGroupId . '.vcf'))
 			{
-				if (isset($this->aGroupItemsCache[$sName][$sGroupId]))
-				{
-					$aContactIds = $this->aGroupItemsCache[$sName][$sGroupId];
-					foreach ($aContactIds as $sContactId)
-					{
-						if ($oAddressBook->childExists($sContactId))
-						{
-							$oContact = $oAddressBook->GetChild($sContactId);
-							$oVCard = \Sabre\VObject\Reader::read($oContact->get());
-
-							if (isset($oVCard->CATEGORIES))
-							{
-								$aCategories = $oVCard->CATEGORIES->getParts();
-								if (in_array($sGroupId, $aCategories))
-								{
-									$aResultCategories = array();
-									foreach($aCategories as $sCategory)
-									{
-										$sCategory = trim($sCategory);
-										if ($sCategory !== $sGroupId)
-										{
-											$aResultCategories[] = $sCategory;
-										}
-									}
-									if (count($aResultCategories) > 0)
-									{
-										$oVCard->CATEGORIES->setValue($aResultCategories);
-									}
-									$oContact->put($oVCard->serialize());
-									$this->aContactItemsCache[$sName][$oContact->getName()] = $oContact;
-								}
-							}
-						}
-					}
-					unset($this->aGroupItemsCache[$sName][$sGroupId]);
-				}
+				$oChild = $oAddressBook->getChild($iGroupId . '.vcf');
+				$oChild->delete();
+				return true;
 			}
-			return true;
+
 		}
 		return false;
 	}
@@ -1389,28 +1306,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 */
 	public function addContactsToGroup($oGroup, $aContactIds)
 	{
-		$bResult = true;
-		
-		if ($oGroup && is_array($aContactIds))
-		{
-			foreach ($aContactIds as $sContactId)
-			{
-				$oContact = $this->getContactById($oGroup->IdUser, $sContactId);
-				if ($oContact && !in_array($oGroup->Name, $oContact->GroupIds))
-				{
-					$aGroupIds = $oContact->GroupIds;
-					array_push($aGroupIds, $oGroup->Name);
-					$oContact->GroupIds = $aGroupIds;
-					$bResult = $this->updateContact($oContact);
-				}
-			}
-		}
-		else
-		{
-			$bResult = false;
-		}
-		
-		return (bool) $bResult;
+		return $this->updateGroup($oGroup);
 	}
 
 	/**
