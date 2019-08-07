@@ -954,9 +954,18 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				foreach ($oGroup->GroupContacts as $oGroupContact)
 				{
 					$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
-					if ($oContact)
+					$sVCardUID = null;
+					if (!empty($oContact->{'DavContacts::VCardUID'}))
 					{
-						$oVCard->add('X-ADDRESSBOOKSERVER-MEMBER', 'urn:uuid:' . $oContact->{'DavContacts::VCardUID'});
+						$sVCardUID = $oContact->{'DavContacts::VCardUID'};
+					}
+					else
+					{
+						$sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
+					}
+					if (isset($sVCardUID))
+					{
+						$oVCard->add('X-ADDRESSBOOKSERVER-MEMBER', 'urn:uuid:' . $sVCardUID);
 					}
 				}		
 		
@@ -1019,6 +1028,23 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		return $bResult;
 	}
 
+	protected function fixContactVCardUid($oAddressBook, $oContact)
+	{
+		$mResult = null;
+		$oChild = $oAddressBook->getChild($oContact->{'DavContacts::UID'} . '.vcf');
+		if ($oChild)
+		{
+			$oVCard = \Sabre\VObject\Reader::read($oChild->get());
+			$sVCardUID = $oVCard->UID;
+			$oContact->{'DavContacts::VCardUID'} = $sVCardUID;
+			$oContact->saveAttribute('DavContacts::VCardUID');
+
+			$mResult = $sVCardUID; 
+		}
+
+		return $mResult;
+	}
+
 	/**
 	 * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
 	 * @return bool
@@ -1029,12 +1055,25 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromGroup($oGroup, $oVCard);
 
 		unset($oVCard->{'X-ADDRESSBOOKSERVER-MEMBER'});
+		$oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
 		foreach ($oGroup->GroupContacts as $oGroupContact)
 		{
 			$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
 			if ($oContact)
 			{
-				$oVCard->add('X-ADDRESSBOOKSERVER-MEMBER', 'urn:uuid:' . $oContact->{'DavContacts::VCardUID'});
+				$sVCardUID = null;
+				if (!empty($oContact->{'DavContacts::VCardUID'}))
+				{
+					$sVCardUID = $oContact->{'DavContacts::VCardUID'};
+				}
+				else
+				{
+					$sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
+				}
+				if (isset($sVCardUID))
+				{
+					$oVCard->add('X-ADDRESSBOOKSERVER-MEMBER', 'urn:uuid:' . $sVCardUID);
+				}
 			}
 		}		
 
