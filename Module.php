@@ -163,6 +163,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME;
 		}
+		else if ($sStorage === 'team')
+		{
+			$sResult = 'gab';
+		}
 		
 		return $sResult;
 	}	
@@ -622,7 +626,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oContact = $aArgs['Contact'];
 		if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 		{
-			$mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->UUID);
+			$mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->{'DavContacts::UID'}, $this->getStorage($oContact->Storage));
 
 			return true;
 		}

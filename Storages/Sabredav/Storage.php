@@ -275,12 +275,19 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		{
 			if (!isset($this->aAddressBooksCache[$iUserId][$sName]))
 			{
-				$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
-					\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
-
-				if ($oUserAddressBooks->childExists($sName))
+				if ($sName === 'gab')
 				{
-					$this->aAddressBooksCache[$iUserId][$sName] = $oUserAddressBooks->getChild($sName);
+					$this->aAddressBooksCache[$iUserId][$sName] = \Afterlogic\DAV\Server::getInstance()->tree->getNodeForPath($sName);
+				}
+				else
+				{
+					$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
+						\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
+
+					if ($oUserAddressBooks->childExists($sName))
+					{
+						$this->aAddressBooksCache[$iUserId][$sName] = $oUserAddressBooks->getChild($sName);
+					}
 				}
 			}
 

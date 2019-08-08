@@ -161,12 +161,12 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      *
 	 * @return resource | bool
 	 */
-	public function getVCardObjectById($iUserId, $mContactId)
+	public function getVCardObjectById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
 	{
 		$mResult = null;
 		try
 		{
-			$oVCardObject = $this->oStorage->getVCardObjectById($iUserId, $mContactId);
+			$oVCardObject = $this->oStorage->getVCardObjectById($iUserId, $mContactId, $sAddressBookName);
 			if ($oVCardObject)
 			{
 				$mResult = $oVCardObject->get();
