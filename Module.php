@@ -456,13 +456,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aUIDs[] = $oContact->{'DavContacts::UID'};
 				$sStorage = $oContact->Storage;
 			}
-			if (!$this->getManager()->deleteContacts(
-					\Aurora\System\Api::getAuthenticatedUserId(),
-					$aUIDs,
-					$this->getStorage($sStorage))
-			)
+			if ($sStorage !== 'gab')
 			{
-				$aResult = false;
+				if (!$this->getManager()->deleteContacts(
+						\Aurora\System\Api::getAuthenticatedUserId(),
+						$aUIDs,
+						$this->getStorage($sStorage))
+				)
+				{
+					$aResult = false;
+				}
 			}
 		}
 		
