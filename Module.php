@@ -456,7 +456,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aUIDs[] = $oContact->{'DavContacts::UID'};
 				$sStorage = $oContact->Storage;
 			}
-			if ($sStorage !== 'gab')
+			if ($sStorage !== 'team')
 			{
 				if (!$this->getManager()->deleteContacts(
 						\Aurora\System\Api::getAuthenticatedUserId(),
