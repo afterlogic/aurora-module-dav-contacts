@@ -962,13 +962,20 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				{
 					$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
 					$sVCardUID = null;
-					if (!empty($oContact->{'DavContacts::VCardUID'}))
+					if ($oContact->Storage !== 'team')
 					{
-						$sVCardUID = $oContact->{'DavContacts::VCardUID'};
+						if (!empty($oContact->{'DavContacts::VCardUID'}))
+						{
+							$sVCardUID = $oContact->{'DavContacts::VCardUID'};
+						}
+						else
+						{
+							$sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
+						}
 					}
 					else
 					{
-						$sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
+						$sVCardUID = $oContact->UUID;
 					}
 					if (isset($sVCardUID))
 					{
@@ -1038,15 +1045,18 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	protected function fixContactVCardUid($oAddressBook, $oContact)
 	{
 		$mResult = null;
-		$oChild = $oAddressBook->getChild($oContact->{'DavContacts::UID'} . '.vcf');
-		if ($oChild)
+		if ($oAddressBook->childExists($oContact->{'DavContacts::UID'} . '.vcf'))
 		{
-			$oVCard = \Sabre\VObject\Reader::read($oChild->get());
-			$sVCardUID = $oVCard->UID;
-			$oContact->{'DavContacts::VCardUID'} = $sVCardUID;
-			$oContact->saveAttribute('DavContacts::VCardUID');
+			$oChild = $oAddressBook->getChild($oContact->{'DavContacts::UID'} . '.vcf');
+			if ($oChild)
+			{
+				$oVCard = \Sabre\VObject\Reader::read($oChild->get());
+				$sVCardUID = $oVCard->UID;
+				$oContact->{'DavContacts::VCardUID'} = $sVCardUID;
+				$oContact->saveAttribute('DavContacts::VCardUID');
 
-			$mResult = $sVCardUID; 
+				$mResult = $sVCardUID; 
+			}
 		}
 
 		return $mResult;
@@ -1069,13 +1079,20 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			if ($oContact)
 			{
 				$sVCardUID = null;
-				if (!empty($oContact->{'DavContacts::VCardUID'}))
+				if ($oContact->Storage !== 'team')
 				{
-					$sVCardUID = $oContact->{'DavContacts::VCardUID'};
+					if (!empty($oContact->{'DavContacts::VCardUID'}))
+					{
+						$sVCardUID = $oContact->{'DavContacts::VCardUID'};
+					}
+					else
+					{
+						$sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
+					}
 				}
 				else
 				{
-					$sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
+					$sVCardUID = $oContact->UUID;
 				}
 				if (isset($sVCardUID))
 				{
