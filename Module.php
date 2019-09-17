@@ -325,12 +325,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$aGroupData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetGroupDataFromVcard($oVCard, $UUID);
 
-		$aGroupData['Contacts'] = \Aurora\System\Managers\Eav::getInstance()->getEntitiesUids(
-			\Aurora\Modules\Contacts\Classes\Contact::class, 
-			0, 
-			0,
-			['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']]
-		);
+		if (is_array($aGroupData['Contacts']) && count($aGroupData['Contacts']) > 0)
+		{
+			$aGroupData['Contacts'] = \Aurora\System\Managers\Eav::getInstance()->getEntitiesUids(
+				\Aurora\Modules\Contacts\Classes\Contact::class, 
+				0, 
+				0,
+				['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']]
+			);
+		}
+		else
+		{
+			$aGroupData['Contacts'] = [];
+		}
 
 		$oGroupDb = $this->getGroup($UserId, $UUID);
 
