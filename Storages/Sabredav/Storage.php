@@ -887,6 +887,11 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		{
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
 		}
+		else if ($oContact->Storage === 'team')
+		{
+			$bResult = true;
+		}
+
 		$oContactItem = $oAddressBook ? $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf') : null;
 		if ($oContactItem)
 		{
