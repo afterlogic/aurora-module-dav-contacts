@@ -93,18 +93,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		$mResult = false;
 		
-		$oEavManager = \Aurora\System\Managers\Eav::getInstance();
-		$aEntities = $oEavManager->getEntities(
-			\Aurora\Modules\Contacts\Classes\Contact::class, 
-			[], 
-			0, 
-			1,
-			[
+		$aEntities = (new \Aurora\System\EAV\Query())
+			->whereType(\Aurora\Modules\Contacts\Classes\Contact::class)
+			->where([
 				'IdUser' => $iUserId,
 				'Storage' => $sStorage,
 				self::GetName() . '::UID' => $sUID
-			]
-		);
+			])
+			->limit(1)
+			->exec();
+
+
 		if (is_array($aEntities) && count($aEntities) > 0)
 		{
 			$mResult = $aEntities[0];
@@ -123,7 +122,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		$aEntities = (new \Aurora\System\EAV\Query())
 			->whereType(\Aurora\Modules\Contacts\Classes\Group::class)
-			->where(['IdUser' => $iUserId, self::GetName() . '::UID' => $sUID])
+			->where([
+				'IdUser' => $iUserId, 
+				self::GetName() . '::UID' => $sUID
+			])
 			->limit(1)
 			->exec();
 
@@ -140,7 +142,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return (new \Aurora\System\EAV\Query())
 			->select(['GroupUUID', 'ContactUUID'])
 			->whereType(\Aurora\Modules\Contacts\Classes\GroupContact::class)
-			->where(['ContactUUID' => $sUUID])
+			->where([
+				'ContactUUID' => $sUUID
+			])
 			->exec();
 	}
 	
@@ -196,16 +200,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($mResult)
 		{
 			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
-			$oEntity = $oEavManager->getEntity(
+			$oContact = $oEavManager->getEntity(
 				$mResult['UUID'],
 				\Aurora\Modules\Contacts\Classes\Contact::class
 			);
-			if ($oEntity)
+			if ($oContact)
 			{
-				$oEntity->Auto = $bIsAuto;
-				$oEntity->{self::GetName() . '::UID'} = $UID;
-				$oEntity->{self::GetName() . '::VCardUID'} = \str_replace('urn:uuid:', '', (string) $oVCard->UID);
-				$oEavManager->saveEntity($oEntity);
+				$oContact->Auto = $bIsAuto;
+				$oContact->{self::GetName() . '::UID'} = $UID;
+				$oContact->{self::GetName() . '::VCardUID'} = \str_replace('urn:uuid:', '', (string) $oVCard->UID);
+				$oContact->saveAttributes(
+					'Auto',
+					self::GetName() . '::UID',
+					self::GetName() . '::VCardUID'
+				);
 			}
 		}
 		
@@ -281,7 +289,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$oContact->populate($aContactData);
 			$oContact->Storage = $Storage;
-			$mResult = $oEavManager->saveEntity($oContact);
+			$mResult = $oContact->save();
 
 /*			
 			if ($mResult)
@@ -361,8 +369,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$oContact->{self::GetName() . '::UID'} = $sUUID;
 					$oContact->{self::GetName() . '::VCardUID'} = $sUUID;
-
-					\Aurora\System\Managers\Eav::getInstance()->saveEntity($oContact);
+					$oContact->saveAttributes([
+						self::GetName() . '::UID',
+						self::GetName() . '::VCardUID'
+					]);
 					if (!$this->getManager()->createContact($oContact))
 					{
 						$aResult = false;
@@ -492,8 +502,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
 			{
 				$oGroup->{self::GetName() . '::UID'} = $sUUID;
+				$oGroup->saveAttributes([self::GetName() . '::UID']);
 
-				\Aurora\System\Managers\Eav::getInstance()->saveEntity($oGroup);
 				if (!$this->getManager()->createGroup($oGroup))
 				{
 					$aResult = false;
@@ -542,7 +552,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
-		$ContactUUIDs = $aArgs['ContactUUIDs'];
 		$oGroup = \Aurora\Modules\Contacts\Module::Decorator()->GetGroup($aArgs['UserId'], $aArgs['GroupUUID']);
 		if ($oGroup)
 		{
