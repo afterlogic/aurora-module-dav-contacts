@@ -1063,6 +1063,10 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				$mResult = $sVCardUID; 
 			}
 		}
+		else
+		{
+			$mResult = $oContact->UUID;
+		}
 
 		return $mResult;
 	}

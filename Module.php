@@ -209,11 +209,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact->Auto = $bIsAuto;
 				$oContact->{self::GetName() . '::UID'} = $UID;
 				$oContact->{self::GetName() . '::VCardUID'} = \str_replace('urn:uuid:', '', (string) $oVCard->UID);
-				$oContact->saveAttributes(
+				$oContact->saveAttributes([
 					'Auto',
 					self::GetName() . '::UID',
 					self::GetName() . '::VCardUID'
-				);
+				]);
 			}
 		}
 		
@@ -278,7 +278,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		
 		if ($oContact)
 		{
-//			$aGroupsContacts = $this->getGroupsContacts($oContact->UUID);
 			$bIsAuto = false;
 			if ($Storage === 'collected')
 			{
@@ -286,28 +285,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$Storage = 'personal';
 			}
 
-			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
 			$oContact->populate($aContactData);
 			$oContact->Storage = $Storage;
 			$mResult = $oContact->save();
-
-/*			
-			if ($mResult)
-			{
-				\Aurora\System\Api::GetModule('Contacts')->getManager()->updateContactGroups($oContact);
-				
-				$oContactsModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Contacts');
-
-				foreach ($aGroupsContacts as $oGroupsContact)
-				{
-					$aContacts = $oContactsModuleDecorator->GetContacts('all', 0, 0, \Aurora\Modules\Contacts\Enums\SortField::Name, \Aurora\System\Enums\SortOrder::ASC, '', $oGroupsContact->GroupUUID);
-					if (isset($aContacts['ContactCount']) && (int) $aContacts['ContactCount'] === 0)
-					{
-						$oContactsModuleDecorator->DeleteGroup($oGroupsContact->GroupUUID);
-					}
-				}
-			}
-*/			
 		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 		
@@ -498,7 +478,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = $aResult;
 		if ($sUUID)
 		{
-			$oGroup = \Aurora\System\Api::GetModule('Contacts')->GetGroup($aArgs['UserId'], $sUUID);
+			$oGroup = \Aurora\Modules\Contacts\Module::getInstance()->GetGroup($aArgs['UserId'], $sUUID);
 			if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
 			{
 				$oGroup->{self::GetName() . '::UID'} = $sUUID;
@@ -522,7 +502,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$sUUID = isset($aArgs['Group']) && isset($aArgs['Group']['UUID'])? $aArgs['Group']['UUID'] : false;
 		if ($sUUID)
 		{
-			$oGroup = \Aurora\System\Api::GetModule('Contacts')->GetGroup($aArgs['UserId'], $sUUID);
+			$oGroup = \Aurora\Modules\Contacts\Module::getInstance()->GetGroup($aArgs['UserId'], $sUUID);
 			if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
 			{
 				if (!$this->getManager()->updateGroup($oGroup))
@@ -594,7 +574,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	
 	public function onBeforeUpdateSharedContacts($aArgs, &$mResult)
 	{
-		$oContacts = \Aurora\System\Api::GetModuleDecorator('Contacts');
+		$oContacts = \Aurora\Modules\Contacts\Module::Decorator();
 		{
 			$aUUIDs = isset($aArgs['UUIDs']) ? $aArgs['UUIDs'] : [];
 			foreach ($aUUIDs as $sUUID)
