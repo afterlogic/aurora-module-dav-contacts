@@ -137,17 +137,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $mResult;
 	}	
 	
-	protected function getGroupsContacts($sUUID)
-	{
-		return (new \Aurora\System\EAV\Query())
-			->select(['GroupUUID', 'ContactUUID'])
-			->whereType(\Aurora\Modules\Contacts\Classes\GroupContact::class)
-			->where([
-				'ContactUUID' => $sUUID
-			])
-			->exec();
-	}
-	
 	protected function getStorage($sStorage)
 	{
 		$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
@@ -199,12 +188,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
 		if ($mResult)
 		{
-			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
-			$oContact = $oEavManager->getEntity(
-				$mResult['UUID'],
-				\Aurora\Modules\Contacts\Classes\Contact::class
-			);
-			if ($oContact)
+			$oContact = \Aurora\Modules\Contacts\Module::getInstance()->GetContact($mResult['UUID'], $UserId);
+
+			if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 			{
 				$oContact->Auto = $bIsAuto;
 				$oContact->{self::GetName() . '::UID'} = $UID;
@@ -404,11 +390,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 						{
 							foreach ($oContact->GroupsContacts as $oGroupsContact)
 							{
-								$oGroup = \Aurora\System\Managers\Eav::getInstance()->getEntity(
-									$oGroupsContact->GroupUUID, 
-									\Aurora\Modules\Contacts\Classes\Group::class
-								);
-								if ($oGroup)
+								$oGroup = \Aurora\Modules\Contacts\Module::Decorator()->GetGroup($UserId, $oGroupsContact->GroupUUID);
+								if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
 								{
 									$this->getManager()->updateGroup($oGroup);
 								}
