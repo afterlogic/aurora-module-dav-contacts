@@ -73,7 +73,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::UpdateGroup::after', array($this, 'onAfterUpdateGroup'));
 		
 		$this->subscribeEvent('Contacts::DeleteGroup::before', array($this, 'onBeforDeleteGroup'));
-		$this->subscribeEvent('Contacts::DeleteGroup::after', array($this, 'onAfterDeleteGroup'));
+//		$this->subscribeEvent('Contacts::DeleteGroup::after', array($this, 'onAfterDeleteGroup'));
 
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
@@ -500,11 +500,19 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @param array $aArgs
 	 * @param array $aResult
 	 */
-	public function onAfterDeleteGroup(&$aArgs, &$aResult)
+	public function onBeforDeleteGroup(&$aArgs, &$mResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
-		$aResult = $this->getManager()->deleteGroup($aArgs['UserId'], $aArgs['UUID']);
+		$oGroup = \Aurora\Modules\Contacts\Module::getInstance()->GetGroup(
+			$aArgs['UserId'],
+			$aArgs['UUID']
+		);
+
+		if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
+		{
+			$mResult = $this->getManager()->deleteGroup($aArgs['UserId'], $oGroup->{$this->GetName() . '::UID'});
+		}
 	}
 	
 	/**
