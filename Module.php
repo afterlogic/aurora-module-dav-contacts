@@ -7,6 +7,9 @@
 
 namespace Aurora\Modules\DavContacts;
 
+use \Aurora\Modules\Contacts\Enums\StorageType;
+use Aurora\System\EAV\Query;
+
 /**
  * Adds ability to work with Dav Contacts.
  * 
@@ -20,9 +23,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 {
 	public $oManager = null;
 
-	protected $aRequireModules = array(
+	protected $aRequireModules = [
 		'Contacts'
-	);
+	];
 	
 	protected $_oldGroup = null;
 	
@@ -91,25 +94,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	protected function getContact($iUserId, $sStorage, $sUID)
 	{
-		$mResult = false;
-		
-		$aEntities = (new \Aurora\System\EAV\Query())
-			->whereType(\Aurora\Modules\Contacts\Classes\Contact::class)
+		return (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
 			->where([
 				'IdUser' => $iUserId,
 				'Storage' => $sStorage,
 				self::GetName() . '::UID' => $sUID
 			])
 			->limit(1)
+			->one()
 			->exec();
-
-
-		if (is_array($aEntities) && count($aEntities) > 0)
-		{
-			$mResult = $aEntities[0];
-		}
-		
-		return $mResult;
 	}	
 
 	/**
@@ -118,41 +111,32 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 */
 	protected function getGroup($iUserId, $sUID)
 	{
-		$mResult = false;
-		
-		$aEntities = (new \Aurora\System\EAV\Query())
-			->whereType(\Aurora\Modules\Contacts\Classes\Group::class)
+		return (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Group::class))
 			->where([
 				'IdUser' => $iUserId, 
 				self::GetName() . '::UID' => $sUID
 			])
 			->limit(1)
+			->one()
 			->exec();
-
-		if (is_array($aEntities) && count($aEntities) > 0)
-		{
-			$mResult = $aEntities[0];
-		}
-		
-		return $mResult;
 	}	
 	
 	protected function getStorage($sStorage)
 	{
 		$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
-		if ($sStorage === 'personal')
+		if ($sStorage === StorageType::Personal)
 		{
 			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
 		}
-		else if ($sStorage === 'shared')
+		else if ($sStorage === StorageType::Shared)
 		{
 			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME;
 		}
-		else if ($sStorage === 'collected')
+		else if ($sStorage === StorageType::Collected)
 		{
 			$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME;
 		}
-		else if ($sStorage === 'team')
+		else if ($sStorage === StorageType::Team)
 		{
 			$sResult = 'gab';
 		}
@@ -167,7 +151,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
 	 */
-	public function CreateContact($UserId, $VCard, $UID, $Storage = 'personal')
+	public function CreateContact($UserId, $VCard, $UID, $Storage = StorageType::Personal)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 		
@@ -175,10 +159,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oContactsDecorator = \Aurora\Modules\Contacts\Module::Decorator();
 		
 		$bIsAuto = false;
-		if ($Storage === 'collected')
+		if ($Storage === StorageType::Collected)
 		{
 			$bIsAuto = true;
-			$Storage = 'personal';
+			$Storage = StorageType::Personal;
 		}
 		
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
@@ -265,10 +249,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($oContact)
 		{
 			$bIsAuto = false;
-			if ($Storage === 'collected')
+			if ($Storage === StorageType::Collected)
 			{
 				$bIsAuto = true;
-				$Storage = 'personal';
+				$Storage = StorageType::Personal;
 			}
 
 			$oContact->populate($aContactData);
@@ -297,12 +281,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (is_array($aGroupData['Contacts']) && count($aGroupData['Contacts']) > 0)
 		{
-			$aGroupData['Contacts'] = \Aurora\System\Managers\Eav::getInstance()->getEntitiesUids(
-				\Aurora\Modules\Contacts\Classes\Contact::class, 
-				0, 
-				0,
-				['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']]
-			);
+			$aGroupData['Contacts'] = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
+				->where(['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']])
+				->onlyUUIDs()
+				->exec();
 		}
 		else
 		{
@@ -378,7 +360,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aArgs['Contact']['UUID'], $UserId);
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
-					$oDavContact = $this->getManager()->getContactById($UserId, $oContact->{self::GetName() . '::UID'}, $this->getStorage($aArgs['Contact']['Storage']));
+					$oDavContact = $this->getManager()->getContactById(
+						$UserId, 
+						$oContact->{self::GetName() . '::UID'}, 
+						$this->getStorage($aArgs['Contact']['Storage'])
+					);
 					
 					if ($oDavContact)
 					{
@@ -420,22 +406,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (isset($aArgs['UUIDs']))
 		{
-			$oEavManager = \Aurora\System\Managers\Eav::getInstance();
-			$aEntities = $oEavManager->getEntities(
-				\Aurora\Modules\Contacts\Classes\Contact::class, 
-				['DavContacts::UID', 'Storage'], 
-				0, 
-				0,
-				['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']]
-			);
+
+			$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
+				->select(['DavContacts::UID', 'Storage'])
+				->where(['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']])
+				->exec();
+
 			$aUIDs = [];
-			$sStorage = 'personal';
+			$sStorage = StorageType::Personal;
 			foreach ($aEntities as $oContact)
 			{
 				$aUIDs[] = $oContact->{'DavContacts::UID'};
 				$sStorage = $oContact->Storage;
 			}
-			if ($sStorage !== 'team')
+			if ($sStorage !== StorageType::Team)
 			{
 				if (!$this->getManager()->deleteContacts(
 						$aArgs['UserId'],
@@ -573,7 +557,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = $oContacts->GetContact($sUUID);
 				if ($oContact)
 				{
-					if ($oContact->Storage === 'shared')
+					if ($oContact->Storage === StorageType::Shared)
 					{
 						$this->getManager()->copyContact(
 								$aArgs['UserId'], 
@@ -582,7 +566,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME
 						);
 					}
-					else if ($oContact->Storage === 'personal')
+					else if ($oContact->Storage === StorageType::Personal)
 					{
 						$this->getManager()->copyContact(
 								$aArgs['UserId'], 

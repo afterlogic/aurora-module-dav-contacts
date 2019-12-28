@@ -332,7 +332,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 * @param int $iUserId
 	 * @param \Sabre\CardDAV\AddressBook $oAddressBook
 	 * @param string $sId
-	 * @return bool | \Sabre\DAV\Card
+	 * @return \Sabre\CardDAV\Card | bool
 	 */
 	protected function geItem($iUserId, $oAddressBook, $sId)
 	{
@@ -394,7 +394,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 					{
 						$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 					}
-					catch(Exception $ex)
+					catch(\Exception $ex)
 					{
 						\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 					}
@@ -497,7 +497,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				{
 					$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 				}
-				catch(Exception $ex)
+				catch(\Exception $ex)
 				{
 					\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 				}
@@ -590,7 +590,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			{
 				$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 			}
-			catch(Exception $ex)
+			catch(\Exception $ex)
 			{
 				\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 			}
@@ -809,7 +809,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			{
 				$oVCard = \Sabre\VObject\Reader::read($oItem->get());
 			}
-			catch(Exception $ex)
+			catch(\Exception $ex)
 			{
 				\Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
 			}
@@ -860,7 +860,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 					$oAddressBookTo->createFile($oContact->UUID . '.vcf', $sData);
 					$bResult = true;
 				}
-				catch (Exception $ex)
+				catch (\Exception $ex)
 				{
 					\Aurora\System\Api::Log($ex->getTraceAsString());
 					$bResult = false;
@@ -1361,7 +1361,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 					$oAddressBook->delete();
 					$bResult = true;
 				}
-				catch (Exception $ex)
+				catch (\Exception $ex)
 				{
 					\Aurora\System\Api::Log($ex->getTraceAsString());
 					$bResult = false;
