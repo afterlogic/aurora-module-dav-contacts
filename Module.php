@@ -404,11 +404,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
+		\Aurora\Modules\Contacts\Module::getInstance()->CheckAccess($aArgs['UserId']);
+		$oUser = \Aurora\System\Api::getUserById($aArgs['UserId']);
+
 		if (isset($aArgs['UUIDs']))
 		{
-
 			$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
-				->select(['DavContacts::UID', 'Storage'])
+				->select(['DavContacts::UID', 'Storage', 'IdUser'])
 				->where(['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']])
 				->exec();
 
@@ -416,8 +418,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$sStorage = StorageType::Personal;
 			foreach ($aEntities as $oContact)
 			{
-				$aUIDs[] = $oContact->{'DavContacts::UID'};
-				$sStorage = $oContact->Storage;
+				if (\Aurora\Modules\Contacts\Module::Decorator()->CheckAccessToObject($oUser, $oContact))
+				{
+					$aUIDs[] = $oContact->{'DavContacts::UID'};
+					$sStorage = $oContact->Storage; // TODO: sash04ek
+				}
 			}
 			if ($sStorage !== StorageType::Team)
 			{
@@ -431,7 +436,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 				}
 			}
 		}
-		
 	}	
 	
 	/**
