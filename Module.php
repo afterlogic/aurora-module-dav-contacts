@@ -96,9 +96,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		return (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
 			->where([
-				'IdUser' => $iUserId,
-				'Storage' => $sStorage,
-				self::GetName() . '::UID' => $sUID
+				'$AND' => [
+					'IdUser' => $iUserId,
+					'Storage' => $sStorage,
+					self::GetName() . '::UID' => $sUID
+				]
 			])
 			->limit(1)
 			->one()
@@ -113,8 +115,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		return (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Group::class))
 			->where([
-				'IdUser' => $iUserId, 
-				self::GetName() . '::UID' => $sUID
+				'$AND' => [
+					'IdUser' => $iUserId, 
+					self::GetName() . '::UID' => $sUID
+				]
 			])
 			->limit(1)
 			->one()
