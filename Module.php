@@ -8,11 +8,12 @@
 namespace Aurora\Modules\DavContacts;
 
 use \Aurora\Modules\Contacts\Enums\StorageType;
-use Aurora\System\EAV\Query;
+use \Aurora\Modules\Contacts\Models\Contact;
+use \Aurora\Modules\Contacts\Models\Group;
 
 /**
  * Adds ability to work with Dav Contacts.
- * 
+ *
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
  * @copyright Copyright (c) 2019, Afterlogic Corp.
@@ -26,9 +27,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	protected $aRequireModules = [
 		'Contacts'
 	];
-	
+
 	protected $_oldGroup = null;
-	
+
 	protected $__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
 	protected $__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 
@@ -42,39 +43,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 		return $this->oManager;
 	}
 
-	public function init() 
+	public function init()
 	{
-		\Aurora\Modules\Contacts\Classes\Contact::extend(
-			self::GetName(),
-			[
-				'UID' => ['string', '']
-			]
-
-		);		
-		\Aurora\Modules\Contacts\Classes\Contact::extend(
-			self::GetName(),
-			[
-				'VCardUID' => ['string', '']
-			]
-
-		);
-		\Aurora\Modules\Contacts\Classes\Group::extend(
-			self::GetName(),
-			[
-				'UID' => ['string', '']
-			]
-
-		);
-		
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
 		$this->subscribeEvent('Contacts::DeleteContacts::before', array($this, 'onBeforeDeleteContacts'));
 
 		$this->subscribeEvent('Contacts::CreateGroup::after', array($this, 'onAfterCreateGroup'));
-		
+
 		$this->subscribeEvent('Contacts::UpdateGroup::before', array($this, 'onBeforeUpdateGroup'));
 		$this->subscribeEvent('Contacts::UpdateGroup::after', array($this, 'onAfterUpdateGroup'));
-		
+
 		$this->subscribeEvent('Contacts::DeleteGroup::before', array($this, 'onBeforDeleteGroup'));
 //		$this->subscribeEvent('Contacts::DeleteGroup::after', array($this, 'onAfterDeleteGroup'));
 
@@ -82,49 +61,30 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
 		$this->subscribeEvent('Contacts::UpdateSharedContacts::before', array($this, 'onBeforeUpdateSharedContacts'));
-		
+
 		$this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
 
 		$this->subscribeEvent('Contacts::GetContactAsVCF::before', array($this, 'onBeforeGetContactAsVCF'));
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param type $sUID
 	 */
 	protected function getContact($iUserId, $sStorage, $sUID)
 	{
-		return (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
-			->where([
-				'$AND' => [
-					'IdUser' => $iUserId,
-					'Storage' => $sStorage,
-					self::GetName() . '::UID' => $sUID
-				]
-			])
-			->limit(1)
-			->one()
-			->exec();
-	}	
+		return Contact::where('IdUser', $iUserId)->where('Storage', $sStorage)->where('Properties->' . self::GetName() . '::UID', $sUID)->first();
+	}
 
 	/**
-	 * 
+	 *
 	 * @param type $sUID
 	 */
 	protected function getGroup($iUserId, $sUID)
 	{
-		return (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Group::class))
-			->where([
-				'$AND' => [
-					'IdUser' => $iUserId, 
-					self::GetName() . '::UID' => $sUID
-				]
-			])
-			->limit(1)
-			->one()
-			->exec();
-	}	
-	
+		return Group::where('IdUser', $iUserId)->where('Properties->' . self::GetName() . '::UID', $sUID)->first();
+	}
+
 	protected function getStorage($sStorage)
 	{
 		$sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
@@ -144,12 +104,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$sResult = 'gab';
 		}
-		
+
 		return $sResult;
-	}	
-	
+	}
+
 	/**
-	 * 
+	 *
 	 * @param int $UserId
 	 * @param string $VCard
 	 * @return bool|string
@@ -158,46 +118,42 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CreateContact($UserId, $VCard, $UID, $Storage = StorageType::Personal)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$oContactsDecorator = \Aurora\Modules\Contacts\Module::Decorator();
-		
+
 		$bIsAuto = false;
 		if ($Storage === StorageType::Collected)
 		{
 			$bIsAuto = true;
 			$Storage = StorageType::Personal;
 		}
-		
+
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 		$aContactData['Storage'] = $Storage;
-		
+
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
 		$mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
 		if ($mResult)
 		{
 			$oContact = \Aurora\Modules\Contacts\Module::getInstance()->GetContact($mResult['UUID'], $UserId);
 
-			if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
+			if ($oContact instanceof Contact)
 			{
 				$oContact->Auto = $bIsAuto;
-				$oContact->{self::GetName() . '::UID'} = $UID;
-				$oContact->{self::GetName() . '::VCardUID'} = \str_replace('urn:uuid:', '', (string) $oVCard->UID);
-				$oContact->saveAttributes([
-					'Auto',
-					self::GetName() . '::UID',
-					self::GetName() . '::VCardUID'
-				]);
+				$oContact->setExtendedProp(self::GetName() . '::UID', $UID);
+				$oContact->setExtendedProp(self::GetName() . '::VCardUID', \str_replace('urn:uuid:', '', (string) $oVCard->UID));
+				$oContact->save();
 			}
 		}
-		
+
 		$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
-		
+
 		return $mResult;
-	}	
+	}
 
 	/**
-	 * 
+	 *
 	 * @param int $UserId
 	 * @param string $VCard
 	 * @return bool|string
@@ -206,16 +162,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function CreateGroup($UserId, $VCard, $UUID)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
-		
+
 		$aGroupData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetGroupDataFromVcard($oVCard, $UUID);
 
 		if (isset($aGroupData['Contacts']) && is_array($aGroupData['Contacts']) && count($aGroupData['Contacts']) > 0)
 		{
 			$aGroupData['Contacts'] = \Aurora\System\Managers\Eav::getInstance()->getEntitiesUids(
-				\Aurora\Modules\Contacts\Classes\Contact::class, 
-				0, 
+				\Aurora\Modules\Contacts\Classes\Contact::class,
+				0,
 				0,
 				['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']]
 			);
@@ -225,14 +181,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			$aGroupData['DavContacts::UID'] = $UUID;
 		}
-		
+
 		$mResult = \Aurora\Modules\Contacts\Module::getInstance()->CreateGroup($aGroupData, $UserId);
-		
+
 		return $mResult;
-	}		
-	
+	}
+
 	/**
-	 * 
+	 *
 	 * @param string $VCard
 	 * @return bool|string
 	 * @throws \Aurora\System\Exceptions\ApiException
@@ -240,16 +196,16 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function UpdateContact($UserId, $VCard, $UUID, $Storage = 'personal')
 	{
 		$mResult = false;
-		
+
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
 		$aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
 		/* @var $oContact \Aurora\Modules\Contacts\Classes\Contact */
 		$oContact = $this->getContact($UserId, $Storage, $UUID);
-		
+
 		if ($oContact)
 		{
 			$bIsAuto = false;
@@ -264,12 +220,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult = $oContact->save();
 		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
-		
+
 		return $mResult;
-	}	
+	}
 
 	/**
-	 * 
+	 *
 	 * @param int $UserId
 	 * @param string $VCard
 	 * @return bool|string
@@ -278,17 +234,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function UpdateGroup($UserId, $VCard, $UUID)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		$oVCard = \Sabre\VObject\Reader::read($VCard, \Sabre\VObject\Reader::OPTION_IGNORE_INVALID_LINES);
-		
+
 		$aGroupData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetGroupDataFromVcard($oVCard, $UUID);
 
 		if (is_array($aGroupData['Contacts']) && count($aGroupData['Contacts']) > 0)
 		{
-			$aGroupData['Contacts'] = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
-				->where(['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']])
-				->onlyUUIDs()
-				->exec();
+			$aGroupData['Contacts'] = Contact::select('UUID')
+				->whereIn('Properties->DavContacts::VCardUID', $aGroupData['Contacts'])
+				->get()
+				->map(function ($val) {
+					return $val->UUID;
+				})
+				->toArray();
 		}
 		else
 		{
@@ -298,12 +257,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oGroupDb = $this->getGroup($UserId, $UUID);
 
 		$aGroupData['UUID'] = $oGroupDb->UUID;
-		
+
 		$mResult = \Aurora\Modules\Contacts\Module::getInstance()->UpdateGroup($UserId, $aGroupData);
-		
+
 		return $mResult;
-	}		
-	
+	}
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -317,14 +276,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($sUUID)
 			{
 				$oContact = \Aurora\Modules\Contacts\Module::getInstance()->GetContact($sUUID, $aArgs['UserId']);
-				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
+				if ($oContact instanceof \Aurora\Modules\Contacts\Models\Contact)
 				{
-					$oContact->{self::GetName() . '::UID'} = $sUUID;
-					$oContact->{self::GetName() . '::VCardUID'} = $sUUID;
-					$oContact->saveAttributes([
-						self::GetName() . '::UID',
-						self::GetName() . '::VCardUID'
-					]);
+					$oContact->setExtendedProp(self::GetName() . '::UID', $sUUID);
+					$oContact->setExtendedProp(self::GetName() . '::VCardUID', $sUUID);
+					$oContact->save();
 					if (!$this->getManager()->createContact($oContact))
 					{
 						$aResult = false;
@@ -346,8 +302,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				}
 			}
 		}
-	}	
-	
+	}
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -365,11 +321,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$oDavContact = $this->getManager()->getContactById(
-						$UserId, 
-						$oContact->{self::GetName() . '::UID'}, 
+						$UserId,
+						$oContact->{self::GetName() . '::UID'},
 						$this->getStorage($aArgs['Contact']['Storage'])
 					);
-					
+
 					if ($oDavContact)
 					{
 						if (!$this->getManager()->updateContact($oContact))
@@ -395,11 +351,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 							$aResult = false;
 						}
 					}
-				}			
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -440,8 +396,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				}
 			}
 		}
-	}	
-	
+	}
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -478,7 +434,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($sUUID)
 		{
 			$oGroup = \Aurora\Modules\Contacts\Module::getInstance()->GetGroup($aArgs['UserId'], $sUUID);
-			if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
+			if ($oGroup instanceof \Aurora\Modules\Contacts\Models\Group)
 			{
 				if (!$this->getManager()->updateGroup($oGroup))
 				{
@@ -506,7 +462,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult = $this->getManager()->deleteGroup($aArgs['UserId'], $oGroup->{$this->GetName() . '::UID'});
 		}
 	}
-	
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -514,14 +470,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onAfterAddContactsToGroup(&$aArgs, &$aResult)
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-		
+
 		$oGroup = \Aurora\Modules\Contacts\Module::Decorator()->GetGroup($aArgs['UserId'], $aArgs['GroupUUID']);
 		if ($oGroup)
 		{
 			$this->getManager()->updateGroup($oGroup);
 		}
 	}
-	
+
 	/**
 	 * @param array $aArgs
 	 * @param array $aResult
@@ -540,9 +496,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onBeforeDeleteUser(&$aArgs, &$mResult)
 	{
 		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-		
+
 		$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($aArgs['UserId']);
-		
+
 		if ($oUser instanceof \Aurora\Modules\Core\Classes\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
@@ -551,10 +507,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
 		}
-		
+
 		$this->getManager()->clearAllContactsAndGroups($aArgs['UserId']);
 	}
-	
+
 	public function onBeforeUpdateSharedContacts($aArgs, &$mResult)
 	{
 		$oContacts = \Aurora\Modules\Contacts\Module::Decorator();
@@ -568,8 +524,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 					if ($oContact->Storage === StorageType::Shared)
 					{
 						$this->getManager()->copyContact(
-								$aArgs['UserId'], 
-								$oContact->{'DavContacts::UID'}, 
+								$aArgs['UserId'],
+								$oContact->{'DavContacts::UID'},
 								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
 								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME
 						);
@@ -577,30 +533,30 @@ class Module extends \Aurora\System\Module\AbstractModule
 					else if ($oContact->Storage === StorageType::Personal)
 					{
 						$this->getManager()->copyContact(
-								$aArgs['UserId'], 
-								$oContact->{'DavContacts::UID'}, 
-								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME, 
-								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME 
+								$aArgs['UserId'],
+								$oContact->{'DavContacts::UID'},
+								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
+								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME
 						);
 					}
 				}
 			}
 		}
 	}
-	
+
     public function onGetMobileSyncInfo($aArgs, &$mResult)
 	{
 		$oDavModule = \Aurora\Modules\Dav\Module::Decorator();
 
 		$sDavServer = $oDavModule->GetServerUrl();
-		
+
 		$mResult['Dav']['Contacts'] = array(
 			'PersonalContactsUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
 			'CollectedAddressesUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
 			'SharedWithAllUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
 			'TeamAddressBookUrl' => $sDavServer.'gab'
 		);
-	}	
+	}
 
 	public function onBeforeGetContactAsVCF($aArgs, &$mResult)
 	{
@@ -612,5 +568,5 @@ class Module extends \Aurora\System\Module\AbstractModule
 			return true;
 		}
 	}
-	
+
 }
