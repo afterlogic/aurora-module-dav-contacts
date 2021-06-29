@@ -241,13 +241,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (is_array($aGroupData['Contacts']) && count($aGroupData['Contacts']) > 0)
 		{
-			$aGroupData['Contacts'] = Contact::select('UUID')
-				->whereIn('Properties->DavContacts::VCardUID', $aGroupData['Contacts'])
-				->get()
-				->map(function ($val) {
-					return $val->UUID;
-				})
-				->toArray();
+			$aGroupData['Contacts'] = Contact::whereIn('Properties->DavContacts::VCardUID', $aGroupData['Contacts'])
+				->get('UUID')
+				->map(function ($oContact) {
+					return $oContact->UUID;
+				})->toArray();
 		}
 		else
 		{
@@ -369,10 +367,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (isset($aArgs['UUIDs']))
 		{
-			$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
-				->select(['DavContacts::UID', 'Storage', 'IdUser'])
-				->where(['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']])
-				->exec();
+			$aEntities = Contact::whereIn('UUID', \array_unique($aArgs['UUIDs']))->get();
 
 			$aUIDs = [];
 			$sStorage = StorageType::Personal;
