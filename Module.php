@@ -169,12 +169,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		if (isset($aGroupData['Contacts']) && is_array($aGroupData['Contacts']) && count($aGroupData['Contacts']) > 0)
 		{
-			$aGroupData['Contacts'] = \Aurora\System\Managers\Eav::getInstance()->getEntitiesUids(
-				\Aurora\Modules\Contacts\Classes\Contact::class,
-				0,
-				0,
-				['DavContacts::VCardUID' => [$aGroupData['Contacts'], 'IN']]
-			);
+			$aGroupData['Contacts'] = Contact::whereIn('Properties->DavContacts::VCardUID', $aGroupData['Contacts'])
+				->get('UUID')
+				->map(function ($oContact) {
+					return $oContact->UUID;
+				});
 		}
 
 		if (isset($UUID))
