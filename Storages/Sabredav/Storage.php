@@ -144,7 +144,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			$sVCardData = $oContactItem->get();
 			if ($sVCardData)
 			{
-				$oContact = new \Aurora\Modules\Contacts\Classes\Contact('Contacts');
+				$oContact = new \Aurora\Modules\Contacts\Models\Contact();
 				$oContact->InitFromVCardStr($iUserId, $sVCardData);
 				$oContact->IdContact = $mContactId;
 				$oContact->ETag = trim($oContactItem->getETag(), '"');
@@ -283,7 +283,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				{
 					$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
 						\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
-
+						
 					if ($oUserAddressBooks->childExists($sName))
 					{
 						$this->aAddressBooksCache[$iUserId][$sName] = $oUserAddressBooks->getChild($sName);
@@ -963,9 +963,9 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromGroup($oGroup, $oVCard);
 				unset($oVCard->MEMBER);
 				unset($oVCard->{'X-ADDRESSBOOKSERVER-MEMBER'});
-				foreach ($oGroup->GroupContacts as $oGroupContact)
+				foreach ($oGroup->Contacts as $oGroupContact)
 				{
-					$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
+					$oContact = \Aurora\Modules\Contacts\Models\Contact::where('UUID', $oGroupContact->UUID)->first();
 					$sVCardUID = null;
 					if ($oContact->Storage !== 'team')
 					{
@@ -1057,8 +1057,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			{
 				$oVCard = \Sabre\VObject\Reader::read($oChild->get());
 				$sVCardUID = $oVCard->UID;
-				$oContact->{'DavContacts::VCardUID'} = $sVCardUID;
-				$oContact->saveAttribute('DavContacts::VCardUID');
+				$oContact->setExtendedProp('DavContacts::VCardUID', $sVCardUID);
+				$oContact->save();
 
 				$mResult = $sVCardUID; 
 			}
@@ -1079,12 +1079,12 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	{
 		$oVCard = new \Sabre\VObject\Component\VCard();
 		\Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromGroup($oGroup, $oVCard);
-
+		
 		unset($oVCard->{'X-ADDRESSBOOKSERVER-MEMBER'});
 		$oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-		foreach ($oGroup->GroupContacts as $oGroupContact)
+		foreach ($oGroup->Contacts as $oGroupContact)
 		{
-			$oContact = \Aurora\System\Managers\Eav::getInstance()->getEntity($oGroupContact->ContactUUID, \Aurora\Modules\Contacts\Classes\Contact::class);
+			$oContact = \Aurora\Modules\Contacts\Models\Contact::where('UUID', $oGroupContact->UUID)->first();
 			if ($oContact)
 			{
 				$sVCardUID = null;

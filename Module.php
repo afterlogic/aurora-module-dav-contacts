@@ -315,7 +315,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			{
 				$UserId = $aArgs['UserId'];
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aArgs['Contact']['UUID'], $UserId);
-				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
+				if ($oContact instanceof \Aurora\Modules\Contacts\Models\Contact)
 				{
 					$oDavContact = $this->getManager()->getContactById(
 						$UserId,
@@ -334,7 +334,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 							foreach ($oContact->GroupsContacts as $oGroupsContact)
 							{
 								$oGroup = \Aurora\Modules\Contacts\Module::Decorator()->GetGroup($UserId, $oGroupsContact->GroupUUID);
-								if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
+								if ($oGroup instanceof \Aurora\Modules\Contacts\Models\Group)
 								{
 									$this->getManager()->updateGroup($oGroup);
 								}
@@ -404,11 +404,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($sUUID)
 		{
 			$oGroup = \Aurora\Modules\Contacts\Module::getInstance()->GetGroup($aArgs['UserId'], $sUUID);
-			if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
+			if ($oGroup instanceof \Aurora\Modules\Contacts\Models\Group)
 			{
-				$oGroup->{self::GetName() . '::UID'} = $sUUID;
-				$oGroup->saveAttributes([self::GetName() . '::UID']);
-
+				$oGroup->setExtendedProp(self::GetName() . '::UID', $sUUID);
+				$oGroup->save();
 				if (!$this->getManager()->createGroup($oGroup))
 				{
 					$aResult = false;
@@ -451,7 +450,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$aArgs['UUID']
 		);
 
-		if ($oGroup instanceof \Aurora\Modules\Contacts\Classes\Group)
+		if ($oGroup instanceof \Aurora\Modules\Contacts\Models\Group)
 		{
 			$mResult = $this->getManager()->deleteGroup($aArgs['UserId'], $oGroup->{$this->GetName() . '::UID'});
 		}
@@ -493,7 +492,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($aArgs['UserId']);
 
-		if ($oUser instanceof \Aurora\Modules\Core\Classes\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
+		if ($oUser instanceof \Aurora\Modules\Core\Models\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
 		{
 			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
 		}
