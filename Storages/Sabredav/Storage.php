@@ -1237,10 +1237,10 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 				if ($mFindContact === false)
 				{
 					$sUUID = \Sabre\DAV\UUIDUtil::getUUID();
-					$oContact = new \Aurora\Modules\Contacts\Classes\Contact('Contacts');
+					$oContact = new \Aurora\Modules\Contacts\Models\Contact();
 					$oContact->FullName = $sName;
 					$oContact->PersonalEmail = $sEmail;
-					$oContact->{'DavContacts::UID'} = $sUUID;
+					$oContact->setExtendedProp('DavContacts::UID', $sUUID);
 
 					$oVCard = new \Sabre\VObject\Component\VCard();
 					$oVCard->{'X-AFTERLOGIC-USE-FREQUENCY'} = '1';

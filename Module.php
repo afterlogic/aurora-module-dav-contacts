@@ -554,7 +554,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onBeforeGetContactAsVCF($aArgs, &$mResult)
 	{
 		$oContact = $aArgs['Contact'];
-		if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
+		if ($oContact instanceof \Aurora\Modules\Contacts\Models\Contact)
 		{
 			$mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->{'DavContacts::UID'}, $this->getStorage($oContact->Storage));
 
