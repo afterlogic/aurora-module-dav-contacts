@@ -86,6 +86,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
 
 		$this->subscribeEvent('Contacts::GetContactAsVCF::before', array($this, 'onBeforeGetContactAsVCF'));
+
+		$this->subscribeEvent('Contacts::CreateAddressBook::after', array($this, 'onAfterCreateAddressBook'));
+		$this->subscribeEvent('Contacts::UpdateAddressBook::before', array($this, 'onBeforeUpdateAddressBook'));
+		$this->subscribeEvent('Contacts::DeleteAddressBook::before', array($this, 'onBeforeDeleteAddressBook'));
 	}
 	
 	/**
@@ -325,6 +329,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 						self::GetName() . '::UID',
 						self::GetName() . '::VCardUID'
 					]);
+					
+					if (strlen($oContact->Storage) > 11 && substr($oContact->Storage, 0, 11) === 'addressbook') {
+						$oContact->Storage = 'addressbook';
+					}
 					if (!$this->getManager()->createContact($oContact))
 					{
 						$aResult = false;
@@ -364,14 +372,31 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact = \Aurora\Modules\Contacts\Module::Decorator()->GetContact($aArgs['Contact']['UUID'], $UserId);
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
+					$sContactStorage = $aArgs['Contact']['Storage'];
+					$sStorage = $this->getStorage($sContactStorage);
+					if (strlen($sContactStorage) >= 11 && substr($sContactStorage, 0, 11) === 'addressbook') 
+					{
+						$iAddressBookId = $oContact->AddressBookId;
+			
+						$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
+							'EntityId' => $iAddressBookId
+						])->one()->asArray()->exec();
+						if (isset($oEavAddressBook['Name']))
+						{
+							$sStorage = $oEavAddressBook['Name'];
+						}
+					}
 					$oDavContact = $this->getManager()->getContactById(
 						$UserId, 
 						$oContact->{self::GetName() . '::UID'}, 
-						$this->getStorage($aArgs['Contact']['Storage'])
+						$sStorage
 					);
 					
 					if ($oDavContact)
 					{
+						if (strlen($oContact->Storage) > 11 && substr($oContact->Storage, 0, 11) === 'addressbook') {
+							$oContact->Storage = 'addressbook';
+						}
 						if (!$this->getManager()->updateContact($oContact))
 						{
 							$aResult = false;
@@ -414,26 +439,41 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if (isset($aArgs['UUIDs']))
 		{
 			$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
-				->select(['DavContacts::UID', 'Storage', 'IdUser'])
+				->select(['DavContacts::UID', 'Storage', 'IdUser', 'AddressBookId'])
 				->where(['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']])
 				->exec();
 
 			$aUIDs = [];
-			$sStorage = StorageType::Personal;
+			$sStorage = $sContactStorage = StorageType::Personal;
+			$iAddressBookId = 0;
 			foreach ($aEntities as $oContact)
 			{
 				if (\Aurora\Modules\Contacts\Module::Decorator()->CheckAccessToObject($oUser, $oContact))
 				{
 					$aUIDs[] = $oContact->{'DavContacts::UID'};
-					$sStorage = $oContact->Storage; // TODO: sash04ek
+					$sStorage = $sContactStorage = $oContact->Storage; // TODO: sash04ek
+					$iAddressBookId = $oContact->AddressBookId;
 				}
 			}
 			if ($sStorage !== StorageType::Team)
 			{
+				$sStorage = $this->getStorage($sStorage);
+				if (strlen($sContactStorage) >= 11 && substr($sContactStorage, 0, 11) === 'addressbook') 
+				{
+					$iAddressBookId = $oContact->AddressBookId;
+		
+					$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
+						'EntityId' => $iAddressBookId
+					])->one()->asArray()->exec();
+					if (isset($oEavAddressBook['Name']))
+					{
+						$sStorage = $oEavAddressBook['Name'];
+					}
+				}
 				if (!$this->getManager()->deleteContacts(
 						$aArgs['UserId'],
 						$aUIDs,
-						$this->getStorage($sStorage))
+						$sStorage)
 				)
 				{
 					$aResult = false;
@@ -610,6 +650,38 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->{'DavContacts::UID'}, $this->getStorage($oContact->Storage));
 
 			return true;
+		}
+	}
+
+	public function onAfterCreateAddressBook($aArgs, &$mResult)
+	{
+		$sAddressBookName = $aArgs['AddressBookName'];
+		$mResult = $this->getManager()->createAddressBook($aArgs['UserId'], $sAddressBookName);
+		
+		return true;
+	}
+
+	public function onBeforeUpdateAddressBook($aArgs, &$mResult)
+	{
+		$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
+			'EntityId' => $aArgs['EntityId'],
+			'IdUser' => $aArgs['UserId']
+		])->one()->asArray()->exec();
+		if (isset($oEavAddressBook['Name']))
+		{
+			$mResult = $this->getManager()->updateAddressBook($aArgs['UserId'], $oEavAddressBook['Name'], $aArgs['AddressBookName']);
+		}
+	}
+
+	public function onBeforeDeleteAddressBook($aArgs, &$mResult)
+	{
+		$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
+			'EntityId' => $aArgs['EntityId'],
+			'IdUser' => $aArgs['UserId']
+		])->one()->asArray()->exec();
+		if (isset($oEavAddressBook['Name']))
+		{
+			$mResult = $this->getManager()->deleteAddressBook($aArgs['UserId'], $oEavAddressBook['Name']);
 		}
 	}
 	
