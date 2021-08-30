@@ -11,6 +11,7 @@ use Aurora\Modules\Contacts\Classes\AddressBook;
 use Aurora\System\EAV\Query;
 use Sabre\CardDAV\Plugin;
 use Sabre\DAV\MkCol;
+use Sabre\DAV\PropPatch;
 
 /**
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
@@ -305,7 +306,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		return $oAddressBook;
 	}
 
-	public function createAddressBook($iUserId, $sName)
+	public function createAddressBook($iUserId, $sUri, $sName)
 	{
 		$this->init($iUserId);
 
@@ -313,7 +314,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
 
 		$oUserAddressBooks->createExtendedCollection(
-			$sName, 
+			$sUri, 
 			new MkCol(['{' . Plugin::NS_CARDDAV . '}addressbook'], 
 			['{DAV:}displayname' => $sName])
 		);
@@ -330,7 +331,14 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		if ($oUserAddressBooks->childExists($sName))
 		{
 			$oAddressBook = $oUserAddressBooks->getChild($sName);
-			$oAddressBook->setName($sNewName);
+
+			if ($oAddressBook) {
+				$oPropPath = new PropPatch([
+					'{DAV:}displayname' => $sNewName
+				]);
+				$oAddressBook->propPatch($oPropPath);
+				$oPropPath->commit();
+			}
 
 			return true;
 		}
@@ -949,10 +957,13 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		else if ($oContact->Storage === 'addressbook')
 		{
 			$oEavAddressBook = (new Query(AddressBook::class))->where([
-				'IdUser' => $oContact->IdUser,
-				'EntityId' => $oContact->AddressBookId
+				'EntityId' => $oContact->AddressBookId,
+				'IdUser' => $oContact->IdUser
 			])->one()->exec();
-			$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->Name);
+			if ($oEavAddressBook)
+			{
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->UUID);
+			}
 		}
 
 		$oContactItem = $oAddressBook ? $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf') : null;
@@ -1089,10 +1100,13 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			else if ($oContact->Storage === 'addressbook')
 			{
 				$oEavAddressBook = (new Query(AddressBook::class))->where([
-					'IdUser' => $oContact->IdUser,
-					'EntityId' => $oContact->AddressBookId
+					'EntityId' => $oContact->AddressBookId,
+					'IdUser' => $oContact->IdUser
 				])->one()->exec();
-				$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->Name);
+				if ($oEavAddressBook)
+				{
+					$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->UUID);
+				}
 			}
 			if ($oAddressBook)
 			{

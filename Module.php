@@ -7,6 +7,7 @@
 
 namespace Aurora\Modules\DavContacts;
 
+use Aurora\Modules\Contacts\Classes\AddressBook;
 use \Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\System\EAV\Query;
 
@@ -88,7 +89,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::GetContactAsVCF::before', array($this, 'onBeforeGetContactAsVCF'));
 
 		$this->subscribeEvent('Contacts::CreateAddressBook::after', array($this, 'onAfterCreateAddressBook'));
-		$this->subscribeEvent('Contacts::UpdateAddressBook::before', array($this, 'onBeforeUpdateAddressBook'));
+		$this->subscribeEvent('Contacts::UpdateAddressBook::after', array($this, 'onAfterUpdateAddressBook'));
 		$this->subscribeEvent('Contacts::DeleteAddressBook::before', array($this, 'onBeforeDeleteAddressBook'));
 	}
 	
@@ -376,15 +377,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$sStorage = $this->getStorage($sContactStorage);
 					if (strlen($sContactStorage) >= 11 && substr($sContactStorage, 0, 11) === 'addressbook') 
 					{
-						$iAddressBookId = $oContact->AddressBookId;
-			
-						$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
-							'EntityId' => $iAddressBookId
-						])->one()->asArray()->exec();
-						if (isset($oEavAddressBook['Name']))
+						$oEavAddressBook = (new Query(AddressBook::class))->where([
+							'EntityId' => $oContact->AddressBookId,
+							'IdUser' => $UserId
+						])->one()->exec();
+						if ($oEavAddressBook)
 						{
-							$sStorage = $oEavAddressBook['Name'];
+							$sStorage =  $oEavAddressBook->UUID;
 						}
+						
 					}
 					$oDavContact = $this->getManager()->getContactById(
 						$UserId, 
@@ -460,21 +461,20 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$sStorage = $this->getStorage($sStorage);
 				if (strlen($sContactStorage) >= 11 && substr($sContactStorage, 0, 11) === 'addressbook') 
 				{
-					$iAddressBookId = $oContact->AddressBookId;
-		
-					$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
-						'EntityId' => $iAddressBookId
-					])->one()->asArray()->exec();
-					if (isset($oEavAddressBook['Name']))
+					$oEavAddressBook = (new Query(AddressBook::class))->where([
+						'EntityId' => $iAddressBookId,
+						'IdUser' => $aArgs['UserId']
+					])->one()->exec();
+					if ($oEavAddressBook)
 					{
-						$sStorage = $oEavAddressBook['Name'];
+						$sStorage =  $oEavAddressBook->UUID;
 					}
 				}
 				if (!$this->getManager()->deleteContacts(
 						$aArgs['UserId'],
 						$aUIDs,
-						$sStorage)
-				)
+						$sStorage
+				))
 				{
 					$aResult = false;
 				}
@@ -655,21 +655,41 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function onAfterCreateAddressBook($aArgs, &$mResult)
 	{
-		$sAddressBookName = $aArgs['AddressBookName'];
-		$mResult = $this->getManager()->createAddressBook($aArgs['UserId'], $sAddressBookName);
+		if ($mResult)
+		{
+			$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
+				'EntityId' => $mResult,
+				'IdUser' => $aArgs['UserId']
+			])->one()->exec();
+			if ($oEavAddressBook)
+			{
+				$mResult = $this->getManager()->createAddressBook(
+					$aArgs['UserId'], 
+					$oEavAddressBook->UUID, 
+					$oEavAddressBook->Name
+				);
+			}
+		}
 		
 		return true;
 	}
 
-	public function onBeforeUpdateAddressBook($aArgs, &$mResult)
+	public function onAfterUpdateAddressBook($aArgs, &$mResult)
 	{
-		$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
-			'EntityId' => $aArgs['EntityId'],
-			'IdUser' => $aArgs['UserId']
-		])->one()->asArray()->exec();
-		if (isset($oEavAddressBook['Name']))
+		if ($mResult)
 		{
-			$mResult = $this->getManager()->updateAddressBook($aArgs['UserId'], $oEavAddressBook['Name'], $aArgs['AddressBookName']);
+			$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
+				'EntityId' => $aArgs['EntityId'],
+				'IdUser' => $aArgs['UserId']
+			])->one()->exec();
+			if ($oEavAddressBook)
+			{
+				$mResult = $this->getManager()->updateAddressBook(
+					$aArgs['UserId'], 
+					$oEavAddressBook->UUID,  
+					$aArgs['AddressBookName']
+				);
+			}
 		}
 	}
 
@@ -678,10 +698,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$oEavAddressBook = (new Query(\Aurora\Modules\Contacts\Classes\AddressBook::class))->where([
 			'EntityId' => $aArgs['EntityId'],
 			'IdUser' => $aArgs['UserId']
-		])->one()->asArray()->exec();
-		if (isset($oEavAddressBook['Name']))
+		])->one()->exec();
+		if ($oEavAddressBook)
 		{
-			$mResult = $this->getManager()->deleteAddressBook($aArgs['UserId'], $oEavAddressBook['Name']);
+			$mResult = $this->getManager()->deleteAddressBook(
+				$aArgs['UserId'], 
+				$oEavAddressBook->UUID
+			);
 		}
 	}
 	

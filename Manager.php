@@ -1042,12 +1042,12 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		return $bResult;
 	}	
 
-	public function createAddressBook($iUserId, $sName)
+	public function createAddressBook($iUserId, $sUri, $sName)
 	{
 		$bResult = false;
 		try
 		{
-			$bResult = $this->oStorage->createAddressBook($iUserId, $sName);
+			$bResult = $this->oStorage->createAddressBook($iUserId, $sUri, $sName);
 		}
 		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{
