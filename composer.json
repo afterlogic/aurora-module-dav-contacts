@@ -4,8 +4,8 @@
 	"require":{
 		"php":">=5.4.0",
 		"afterlogic/aurora-framework": "~0.9.0",
-		"afterlogic/aurora-module-dav": "~0.9.0",
-		"afterlogic/dav": "~2.2.0"
+		"afterlogic/aurora-module-dav": "*",
+		"afterlogic/dav": "*"
 	},
 	"extra": {
 		"installer-name": "DavContacts"
