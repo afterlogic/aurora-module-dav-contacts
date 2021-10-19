@@ -944,7 +944,14 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		$oAddressBook = null;
 		if ($oContact->Storage === 'personal')
 		{
-			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+			if (!$oContact->Auto)
+			{
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+			}
+			else
+			{
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME);
+			}
 		}
 		else if ($oContact->Storage === 'shared')
 		{

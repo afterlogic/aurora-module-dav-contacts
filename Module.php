@@ -266,6 +266,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 			$oContact->populate($aContactData);
 			$oContact->Storage = $Storage;
+			$oContact->Auto = $bIsAuto;
 			$mResult = $oContact->save();
 		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
@@ -374,6 +375,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$sContactStorage = $aArgs['Contact']['Storage'];
+					if ($sContactStorage === StorageType::Personal && $aArgs['Contact']['Auto'] === true)
+					{
+						$sContactStorage = StorageType::Collected;
+					}
 					$sStorage = $this->getStorage($sContactStorage);
 					if (strlen($sContactStorage) >= 11 && substr($sContactStorage, 0, 11) === 'addressbook') 
 					{
@@ -440,12 +445,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if (isset($aArgs['UUIDs']))
 		{
 			$aEntities = (new \Aurora\System\EAV\Query(\Aurora\Modules\Contacts\Classes\Contact::class))
-				->select(['DavContacts::UID', 'Storage', 'IdUser', 'AddressBookId'])
+				->select(['DavContacts::UID', 'Storage', 'IdUser', 'AddressBookId', 'Auto'])
 				->where(['UUID' => [\array_unique($aArgs['UUIDs']), 'IN']])
 				->exec();
 
 			$aUIDs = [];
 			$sStorage = $sContactStorage = StorageType::Personal;
+			$bIsAuto = false;
 			$iAddressBookId = 0;
 			foreach ($aEntities as $oContact)
 			{
@@ -453,6 +459,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$aUIDs[] = $oContact->{'DavContacts::UID'};
 					$sStorage = $sContactStorage = $oContact->Storage; // TODO: sash04ek
+					$bIsAuto = $oContact->Auto;
+
 					$iAddressBookId = $oContact->AddressBookId;
 				}
 			}
@@ -469,6 +477,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 					{
 						$sStorage =  $oEavAddressBook->UUID;
 					}
+				}
+				if ($bIsAuto) {
+					$sStorage = $this->getStorage(StorageType::Collected);
 				}
 				if (!$this->getManager()->deleteContacts(
 						$aArgs['UserId'],
