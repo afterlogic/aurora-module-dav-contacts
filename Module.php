@@ -375,7 +375,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				if ($oContact instanceof \Aurora\Modules\Contacts\Classes\Contact)
 				{
 					$sContactStorage = $aArgs['Contact']['Storage'];
-					if ($sContactStorage === StorageType::Personal && $aArgs['Contact']['Auto'] === true)
+					if ($sContactStorage === StorageType::Personal && isset($aArgs['Contact']['Auto']) && $aArgs['Contact']['Auto'] === true)
 					{
 						$sContactStorage = StorageType::Collected;
 					}
