@@ -7,6 +7,11 @@
 
 namespace Aurora\Modules\DavContacts\Storages\Sabredav;
 
+use Aurora\Modules\Contacts\Models\AddressBook;
+use Sabre\CardDAV\Plugin;
+use Sabre\DAV\MkCol;
+use Sabre\DAV\PropPatch;
+
 /**
  * @license https://www.gnu.org/licenses/agpl-3.0.html AGPL-3.0
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
@@ -110,7 +115,6 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
 
 	/**
-	}
 	 * @param int $iUserId
 	 */
 	public function init($iUserId)
@@ -298,6 +302,63 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		}
 
 		return $oAddressBook;
+	}
+
+	public function createAddressBook($iUserId, $sUri, $sName)
+	{
+		$this->init($iUserId);
+
+		$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
+			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
+
+		$oUserAddressBooks->createExtendedCollection(
+			$sUri, 
+			new MkCol(['{' . Plugin::NS_CARDDAV . '}addressbook'], 
+			['{DAV:}displayname' => $sName])
+		);
+
+		return true;
+	}
+
+	public function updateAddressBook($iUserId, $sName, $sNewName)
+	{
+		$this->init($iUserId);
+
+		$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
+			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
+		if ($oUserAddressBooks->childExists($sName))
+		{
+			$oAddressBook = $oUserAddressBooks->getChild($sName);
+
+			if ($oAddressBook) {
+				$oPropPath = new PropPatch([
+					'{DAV:}displayname' => $sNewName
+				]);
+				$oAddressBook->propPatch($oPropPath);
+				$oPropPath->commit();
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public function deleteAddressBook($iUserId, $sName)
+	{
+		$this->init($iUserId);
+
+		$oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
+			\Afterlogic\DAV\Backend::Carddav(), $this->Principal);
+		if ($oUserAddressBooks->childExists($sName))
+		{
+			$oAddressBook = $oUserAddressBooks->getChild($sName);
+			$oAddressBook->delete();
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -891,6 +952,16 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		{
 			$bResult = true;
 		}
+		else if ($oContact->Storage === 'addressbook')
+		{
+			$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
+				->where('UserId', $oContact->IdUser)->first();
+
+			if ($oEavAddressBook)
+			{
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->UUID);
+			}
+		}
 
 		$oContactItem = $oAddressBook ? $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf') : null;
 		if ($oContactItem)
@@ -1022,6 +1093,16 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			else if ($oContact->Storage === 'shared')
 			{
 				$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
+			}
+			else if ($oContact->Storage === 'addressbook')
+			{
+				$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
+					->where('UserId', $oContact->IdUser)->first();
+
+				if ($oEavAddressBook)
+				{
+					$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->UUID);
+				}
 			}
 			if ($oAddressBook)
 			{

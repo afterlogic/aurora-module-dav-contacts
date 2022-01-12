@@ -357,7 +357,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 						substr($sContactStorage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) 
 					{
 						$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
-							->where('IdUser', $UserId)->first();
+							->where('UserId', $UserId)->first();
 
 						if ($oEavAddressBook)
 						{
@@ -441,7 +441,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 					&& substr($sContactStorage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) 
 				{
 					$oEavAddressBook = AddressBook::where('Id', $iAddressBookId)
-						->where('IdUser', $aArgs['UserId'])->first();
+						->where('UserId', $aArgs['UserId'])->first();
 	
 					if ($oEavAddressBook)
 					{
@@ -638,7 +638,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($mResult)
 		{
 			$oEavAddressBook = AddressBook::where('Id', $mResult)
-				->where('IdUser', $aArgs['UserId'])->first();
+				->where('UserId', $aArgs['UserId'])->first();
 
 			if ($oEavAddressBook)
 			{
@@ -658,7 +658,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		if ($mResult)
 		{
 			$oEavAddressBook = AddressBook::where('Id', $aArgs['EntityId'])
-				->where('IdUser', $aArgs['UserId'])->first();
+				->where('UserId', $aArgs['UserId'])->first();
 
 			if ($oEavAddressBook)
 			{
@@ -674,7 +674,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	public function onBeforeDeleteAddressBook($aArgs, &$mResult)
 	{
 		$oEavAddressBook = AddressBook::where('Id',$aArgs['EntityId'])
-			->where('IdUser', $aArgs['UserId'])->first();
+			->where('UserId', $aArgs['UserId'])->first();
 
 		if ($oEavAddressBook)
 		{
