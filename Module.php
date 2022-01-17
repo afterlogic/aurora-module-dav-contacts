@@ -203,7 +203,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 				->get('UUID')
 				->map(function ($oContact) {
 					return $oContact->UUID;
-				});
+				})->toArray();
 		}
 
 		if (isset($UUID))
