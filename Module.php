@@ -170,6 +170,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact->Auto = $bIsAuto;
 				$oContact->setExtendedProp(self::GetName() . '::UID', $UID);
 				$oContact->setExtendedProp(self::GetName() . '::VCardUID', \str_replace('urn:uuid:', '', (string) $oVCard->UID));
+				if (strlen($oContact->Storage) > strlen(StorageType::AddressBook) && substr($oContact->Storage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) {
+					$oContact->Storage = StorageType::AddressBook;
+				}
 				$oContact->save();
 			}
 		}
@@ -243,6 +246,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 			$oContact->populate($aContactData);
 			$oContact->Storage = $Storage;
+			$oContact->Auto = $bIsAuto;
 			$mResult = $oContact->save();
 		}
 		$this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
@@ -304,10 +308,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 				{
 					$oContact->setExtendedProp(self::GetName() . '::UID', $sUUID);
 					$oContact->setExtendedProp(self::GetName() . '::VCardUID', $sUUID);
-					$oContact->save();
+
 					if (strlen($oContact->Storage) > strlen(StorageType::AddressBook) && substr($oContact->Storage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) {
 						$oContact->Storage = StorageType::AddressBook;
 					}
+					$oContact->save();
 					if (!$this->getManager()->createContact($oContact))
 					{
 						$aResult = false;

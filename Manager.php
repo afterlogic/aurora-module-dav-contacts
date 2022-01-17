@@ -773,16 +773,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 	{
 		$bResult = $this->oStorage->clearAllContactsAndGroups($iUserId);
 
-		if ($bResult)
-		{
-			//TODO: add subscription in Twilio
-//			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-//			if ($oApiVoiceManager)
-//			{
-//				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
-//			}
-		}
-
 		return $bResult;
 	}
 
