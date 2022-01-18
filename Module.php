@@ -7,6 +7,7 @@
 
 namespace Aurora\Modules\DavContacts;
 
+use Aurora\Api;
 use \Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\Modules\Contacts\Models\AddressBook;
 use \Aurora\Modules\Contacts\Models\Contact;
@@ -417,7 +418,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
 
-		\Aurora\Modules\Contacts\Module::getInstance()->CheckAccess($aArgs['UserId']);
+		Api::CheckAccess($aArgs['UserId']);
 		$oUser = \Aurora\System\Api::getUserById($aArgs['UserId']);
 
 		if (isset($aArgs['UUIDs']))
