@@ -272,7 +272,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	 * @param string $sName
 	 * @return bool|array
 	 */
-	protected function getAddressBook($iUserId, $sName)
+	public function getAddressBook($iUserId, $sName)
 	{
 		$oAddressBook = false;
 		if ($this->init($iUserId))
