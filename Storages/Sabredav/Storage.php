@@ -7,6 +7,7 @@
 
 namespace Aurora\Modules\DavContacts\Storages\Sabredav;
 
+use Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\Modules\Contacts\Models\AddressBook;
 use Sabre\CardDAV\Plugin;
 use Sabre\DAV\MkCol;
@@ -940,19 +941,19 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		$bResult = false;
 		$iUserId = $oContact->IdUser;
 		$oAddressBook = null;
-		if ($oContact->Storage === 'personal')
+		if ($oContact->Storage === StorageType::Personal)
 		{
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
 		}
-		else if ($oContact->Storage === 'shared')
+		else if ($oContact->Storage === StorageType::Shared)
 		{
 			$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
 		}
-		else if ($oContact->Storage === 'team')
+		else if ($oContact->Storage === StorageType::Team)
 		{
 			$bResult = true;
 		}
-		else if ($oContact->Storage === 'addressbook')
+		else if ($oContact->Storage === StorageType::AddressBook)
 		{
 			$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
 				->where('UserId', $oContact->IdUser)->first();
@@ -1079,7 +1080,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		{
 			$this->init($oContact->IdUser);
 			$oAddressBook = null;
-			if ($oContact->Storage === 'personal')
+			if ($oContact->Storage === StorageType::Personal)
 			{
 				if (!$oContact->Auto)
 				{
@@ -1090,11 +1091,11 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 					$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME);
 				}
 			}
-			else if ($oContact->Storage === 'shared')
+			else if ($oContact->Storage === StorageType::Shared)
 			{
 				$oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
 			}
-			else if ($oContact->Storage === 'addressbook')
+			else if ($oContact->Storage === StorageType::AddressBook)
 			{
 				$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
 					->where('UserId', $oContact->IdUser)->first();

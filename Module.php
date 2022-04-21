@@ -8,6 +8,7 @@
 namespace Aurora\Modules\DavContacts;
 
 use Aurora\Api;
+use Aurora\Modules\Contacts\Enums\Access;
 use \Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\Modules\Contacts\Models\AddressBook;
 use \Aurora\Modules\Contacts\Models\Contact;
@@ -171,7 +172,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$oContact->Auto = $bIsAuto;
 				$oContact->setExtendedProp(self::GetName() . '::UID', $UID);
 				$oContact->setExtendedProp(self::GetName() . '::VCardUID', \str_replace('urn:uuid:', '', (string) $oVCard->UID));
-				if (strlen($oContact->Storage) > strlen(StorageType::AddressBook) && substr($oContact->Storage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) {
+				$aStorageParts = \explode('-', $oContact->Storage);
+				if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
 					$oContact->Storage = StorageType::AddressBook;
 				}
 				$oContact->save();
@@ -310,7 +312,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 					$oContact->setExtendedProp(self::GetName() . '::UID', $sUUID);
 					$oContact->setExtendedProp(self::GetName() . '::VCardUID', $sUUID);
 
-					if (strlen($oContact->Storage) > strlen(StorageType::AddressBook) && substr($oContact->Storage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) {
+					$aStorageParts = \explode('-', $oContact->Storage);
+					if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
 						$oContact->Storage = StorageType::AddressBook;
 					}
 					$oContact->save();
@@ -359,9 +362,10 @@ class Module extends \Aurora\System\Module\AbstractModule
 						$sContactStorage = StorageType::Collected;
 					}
 					$sStorage = $this->getStorage($sContactStorage);
-					if (strlen($sContactStorage) >= strlen(StorageType::AddressBook) && 
-						substr($sContactStorage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) 
-					{
+
+					$aStorageParts = \explode('-', $sContactStorage);
+					if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
+
 						$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
 							->where('UserId', $UserId)->first();
 
@@ -378,8 +382,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 					if ($oDavContact)
 					{
-						if (strlen($oContact->Storage) > strlen(StorageType::AddressBook) && 
-							substr($oContact->Storage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) {
+						$aStorageParts = \explode('-', $oContact->Storage);
+						if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
 							$oContact->Storage = StorageType::AddressBook;
 						}
 						if (!$this->getManager()->updateContact($oContact))
@@ -431,7 +435,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 			$iAddressBookId = 0;
 			foreach ($aEntities as $oContact)
 			{
-				if (\Aurora\Modules\Contacts\Module::Decorator()->CheckAccessToObject($oUser, $oContact))
+				if (\Aurora\Modules\Contacts\Module::Decorator()->CheckAccessToObject($oUser, $oContact, Access::Write))
 				{
 					$aUIDs[] = $oContact->{'DavContacts::UID'};
 					$sStorage = $sContactStorage = $oContact->Storage; // TODO: sash04ek
@@ -443,9 +447,9 @@ class Module extends \Aurora\System\Module\AbstractModule
 			if ($sStorage !== StorageType::Team)
 			{
 				$sStorage = $this->getStorage($sStorage);
-				if (strlen($sContactStorage) >= StorageType::AddressBook 
-					&& substr($sContactStorage, 0, strlen(StorageType::AddressBook)) === StorageType::AddressBook) 
-				{
+				$aStorageParts = \explode('-', $sContactStorage);
+				if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
+
 					$oEavAddressBook = AddressBook::where('Id', $iAddressBookId)
 						->where('UserId', $aArgs['UserId'])->first();
 	
