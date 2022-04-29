@@ -85,7 +85,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
 		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
-		$this->subscribeEvent('Contacts::UpdateSharedContacts::before', array($this, 'onBeforeUpdateSharedContacts'));
+		$this->subscribeEvent('Contacts::UpdateSharedContacts::after', array($this, 'onAfterUpdateSharedContacts'), 90);
 
 		$this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
 
@@ -585,33 +585,34 @@ class Module extends \Aurora\System\Module\AbstractModule
 		$this->getManager()->clearAllContactsAndGroups($aArgs['UserId']);
 	}
 
-	public function onBeforeUpdateSharedContacts($aArgs, &$mResult)
+	public function onAfterUpdateSharedContacts($aArgs, &$mResult)
 	{
 		$oContacts = \Aurora\Modules\Contacts\Module::Decorator();
 		{
 			$aUUIDs = isset($aArgs['UUIDs']) ? $aArgs['UUIDs'] : [];
 			foreach ($aUUIDs as $sUUID)
 			{
-				$oContact = $oContacts->GetContact($sUUID);
+				$oContact = $oContacts->GetContact($sUUID, $aArgs['UserId']);
 				if ($oContact)
 				{
+					$fromStorage = $toStorage = null;
 					if ($oContact->Storage === StorageType::Shared)
 					{
-						$this->getManager()->copyContact(
-								$aArgs['UserId'],
-								$oContact->{'DavContacts::UID'},
-								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
-								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME
-						);
+						$fromStorage = \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME;
+						$toStorage = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
 					}
 					else if ($oContact->Storage === StorageType::Personal)
 					{
+						$fromStorage = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
+						$toStorage = \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME;
+					}
+					if (isset($fromStorage, $toStorage)) {
 						$this->getManager()->copyContact(
-								$aArgs['UserId'],
-								$oContact->{'DavContacts::UID'},
-								\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
-								\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME
-						);
+							$aArgs['UserId'],
+							$oContact->{'DavContacts::UID'},
+							$fromStorage,
+							$toStorage
+					);
 					}
 				}
 			}
