@@ -7,6 +7,7 @@
 
 namespace Aurora\Modules\DavContacts;
 
+use Afterlogic\DAV\Constants;
 use Aurora\Api;
 use Aurora\Modules\Contacts\Enums\Access;
 use \Aurora\Modules\Contacts\Enums\StorageType;
@@ -365,13 +366,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 					$aStorageParts = \explode('-', $sContactStorage);
 					if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
-
 						$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
-							->where('UserId', $UserId)->first();
-
-						if ($oEavAddressBook)
-						{
+							->where('UserId', $UserId)
+							->first();
+						if ($oEavAddressBook) {
 							$sStorage =  $oEavAddressBook->UUID;
+						} else {	
+							$sUserPrincipalUri = Constants::PRINCIPALS_PREFIX . API::getUserPublicIdById($UserId);
+							$dBPrefix = Api::GetSettings()->DBPrefix;
+							$stmt = Api::GetPDO()->prepare("select sa.* from ".$dBPrefix."adav_shared_addressbooks sa 
+							left join ".$dBPrefix."adav_addressbooks da on sa.addressbook_id = da.id 
+							right join ".$dBPrefix."contacts_addressbooks ca on da.uri = ca.UUID where ca.Id = ? and sa.principaluri = ?");
+							$stmt->execute([$oContact->AddressBookId, $sUserPrincipalUri]);
+							$res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+							if (is_array($res) && count($res) > 0) {
+								$sStorage = $res[0]['addressbookuri'];
+							}
 						}
 					}
 					$oDavContact = $this->getManager()->getContactById(
