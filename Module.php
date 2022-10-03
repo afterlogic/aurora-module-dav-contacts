@@ -49,28 +49,6 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function init()
 	{
-		\Aurora\Modules\Contacts\Classes\Contact::extend(
-			self::GetName(),
-			[
-				'UID' => ['string', '']
-			]
-
-		);		
-		\Aurora\Modules\Contacts\Classes\Contact::extend(
-			self::GetName(),
-			[
-				'VCardUID' => ['string', '']
-			]
-
-		);
-		\Aurora\Modules\Contacts\Classes\Group::extend(
-			self::GetName(),
-			[
-				'UID' => ['string', '']
-			]
-
-		);
-
 		$this->subscribeEvent('Contacts::CreateContact::after', array($this, 'onAfterCreateContact'));
 		$this->subscribeEvent('Contacts::UpdateContact::after', array($this, 'onAfterUpdateContact'));
 		$this->subscribeEvent('Contacts::DeleteContacts::before', array($this, 'onBeforeDeleteContacts'));
