@@ -63,7 +63,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 		$this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
 		$this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
-		$this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforeDeleteUser'));
+		$this->subscribeEvent('Core::DeleteUser::after', array($this, 'onAfterDeleteUser'));
 		$this->subscribeEvent('Contacts::UpdateSharedContacts::after', array($this, 'onAfterUpdateSharedContacts'), 90);
 
 		$this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
@@ -555,21 +555,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 		}
 	}
 
-	public function onBeforeDeleteUser(&$aArgs, &$mResult)
+	public function onAfterDeleteUser(&$aArgs, &$mResult)
 	{
-		$oAuthenticatedUser = \Aurora\System\Api::getAuthenticatedUser();
-
-		$oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserUnchecked($aArgs['UserId']);
-
-		if ($oUser instanceof \Aurora\Modules\Core\Models\User && $oAuthenticatedUser->Role === \Aurora\System\Enums\UserRole::TenantAdmin && $oUser->IdTenant === $oAuthenticatedUser->IdTenant)
-		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::TenantAdmin);
-		}
-		else
-		{
-			\Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::SuperAdmin);
-		}
-
 		$this->getManager()->clearAllContactsAndGroups($aArgs['UserId']);
 	}
 
