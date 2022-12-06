@@ -282,7 +282,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			{
 				if ($sName === 'gab')
 				{
-					$this->aAddressBooksCache[$iUserId][$sName] = \Afterlogic\DAV\Server::getInstance()->tree->getNodeForPath($sName);
+					$this->aAddressBooksCache[$iUserId][$sName] = \Afterlogic\DAV\Server::getNodeForPath($sName);
 				}
 				else
 				{
