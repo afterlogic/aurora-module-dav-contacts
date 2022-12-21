@@ -344,11 +344,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 					$aStorageParts = \explode('-', $sContactStorage);
 					if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
-						$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
+						$oAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
 							->where('UserId', $UserId)
 							->first();
-						if ($oEavAddressBook) {
-							$sStorage =  $oEavAddressBook->UUID;
+						if ($oAddressBook) {
+							$sStorage =  $oAddressBook->UUID;
 						} else {	
 							$sUserPrincipalUri = Constants::PRINCIPALS_PREFIX . API::getUserPublicIdById($UserId);
 							$dBPrefix = Api::GetSettings()->DBPrefix;
@@ -438,12 +438,12 @@ class Module extends \Aurora\System\Module\AbstractModule
 				$aStorageParts = \explode('-', $sContactStorage);
 				if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
 
-					$oEavAddressBook = AddressBook::where('Id', $iAddressBookId)
+					$oAddressBook = AddressBook::where('Id', $iAddressBookId)
 						->where('UserId', $aArgs['UserId'])->first();
 	
-					if ($oEavAddressBook)
+					if ($oAddressBook)
 					{
-						$sStorage =  $oEavAddressBook->UUID;
+						$sStorage =  $oAddressBook->UUID;
 					}
 				}
 				if ($bIsAuto) {
@@ -623,15 +623,15 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if ($mResult)
 		{
-			$oEavAddressBook = AddressBook::where('Id', $mResult)
+			$oAddressBook = AddressBook::where('Id', $mResult)
 				->where('UserId', $aArgs['UserId'])->first();
 
-			if ($oEavAddressBook)
+			if ($oAddressBook)
 			{
 				$mResult = $this->getManager()->createAddressBook(
 					$aArgs['UserId'], 
-					$oEavAddressBook->UUID, 
-					$oEavAddressBook->Name
+					$oAddressBook->UUID, 
+					$oAddressBook->Name
 				);
 			}
 		}
@@ -643,14 +643,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
 		if ($mResult)
 		{
-			$oEavAddressBook = AddressBook::where('Id', $aArgs['EntityId'])
+			$oAddressBook = AddressBook::where('Id', $aArgs['EntityId'])
 				->where('UserId', $aArgs['UserId'])->first();
 
-			if ($oEavAddressBook)
+			if ($oAddressBook)
 			{
 				$mResult = $this->getManager()->updateAddressBook(
 					$aArgs['UserId'], 
-					$oEavAddressBook->UUID,  
+					$oAddressBook->UUID,  
 					$aArgs['AddressBookName']
 				);
 			}
@@ -659,14 +659,14 @@ class Module extends \Aurora\System\Module\AbstractModule
 
 	public function onBeforeDeleteAddressBook($aArgs, &$mResult)
 	{
-		$oEavAddressBook = AddressBook::where('Id',$aArgs['EntityId'])
+		$oAddressBook = AddressBook::where('Id',$aArgs['EntityId'])
 			->where('UserId', $aArgs['UserId'])->first();
 
-		if ($oEavAddressBook)
+		if ($oAddressBook)
 		{
 			$mResult = $this->getManager()->deleteAddressBook(
 				$aArgs['UserId'], 
-				$oEavAddressBook->UUID
+				$oAddressBook->UUID
 			);
 		}
 	}

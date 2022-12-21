@@ -534,18 +534,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 		{
 			$mResult = $this->oStorage->getGroupItems($iUserId, $iSortField, $iSortOrder,
 				$iOffset, $iRequestLimit, $sSearch, $sFirstCharacter, $iContactId);
-			//TODO add ability to find by firs character
-//			$mResult = $this->oEavManager->getObjects(
-//				'\Aurora\Modules\Contacts\Classes\Contact', 
-//				array(
-//					'Name'
-//				),
-//				$iOffset,
-//				$iRequestLimit,
-//				array('Name' => '%'.$sSearch.'%'),
-//				$iSortField,
-//				$iSortOrder
-//			);
 		}
 		catch (\Aurora\System\Exceptions\BaseException $oException)
 		{

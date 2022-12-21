@@ -955,12 +955,12 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 		}
 		else if ($oContact->Storage === StorageType::AddressBook)
 		{
-			$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
+			$oAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
 				->where('UserId', $oContact->IdUser)->first();
 
-			if ($oEavAddressBook)
+			if ($oAddressBook)
 			{
-				$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->UUID);
+				$oAddressBook = $this->getAddressBook($oContact->IdUser, $oAddressBook->UUID);
 			}
 		}
 
@@ -1097,12 +1097,12 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 			}
 			else if ($oContact->Storage === StorageType::AddressBook)
 			{
-				$oEavAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
+				$oAddressBook = AddressBook::where('Id', $oContact->AddressBookId)
 					->where('UserId', $oContact->IdUser)->first();
 
-				if ($oEavAddressBook)
+				if ($oAddressBook)
 				{
-					$oAddressBook = $this->getAddressBook($oContact->IdUser, $oEavAddressBook->UUID);
+					$oAddressBook = $this->getAddressBook($oContact->IdUser, $oAddressBook->UUID);
 				}
 			}
 			if ($oAddressBook)
