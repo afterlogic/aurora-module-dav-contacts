@@ -348,15 +348,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 			$this->setLastException($oException);
 		}
 
-		if ($bResult)
-		{
-			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-			if ($oApiVoiceManager)
-			{
-				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
-			}
-		}
-
 		return $bResult;
 	}	
 

@@ -41,6 +41,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	protected $ContactsCache;
 	protected $InitialisedUserId;
 //	protected $AccountsCache;
+	protected $GroupsCache;
+	protected $CoreModuleDecorator;
 
 	/**
 	 * 
@@ -240,7 +242,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
 					if (isset($this->aGroupItemsCache[$oAddressBook->getName()][$mGroupId]))
 					{
-						$bResult = new \Aurora\Modules\Contacts\Classes\Group();
+						$bResult = new \Aurora\Modules\Contacts\Models\Group();
 						$bResult->IdUser = $iUserId;
 						$bResult->IdGroup = $mGroupId;
 						$bResult->IdGroupStr = $mGroupId;
@@ -543,7 +545,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 	/**
 	 * @param int $iUserId
 	 * @param \Afterlogic\DAV\CardDAV\AddressBook
-	 * @return bool|array
+	 * @return void
 	 */
 	protected function initGroupItems($iUserId, $oAddressBook)
 	{
