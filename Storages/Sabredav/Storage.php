@@ -556,7 +556,9 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
         $aMapSortField = array(
             \Aurora\Modules\Contacts\Enums\SortField::Email => 'Email',
             \Aurora\Modules\Contacts\Enums\SortField::Name => 'Name',
-            \Aurora\Modules\Contacts\Enums\SortField::Frequency => 'Frequency'
+            \Aurora\Modules\Contacts\Enums\SortField::Frequency => 'Frequency',
+            \Aurora\Modules\Contacts\Enums\SortField::FirstName => 'FirstName',
+            \Aurora\Modules\Contacts\Enums\SortField::LastName => 'LastName'
         );
 
         if (!isset($aMapSortField[$iSortField])) {
