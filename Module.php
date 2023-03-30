@@ -553,9 +553,19 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         $oContact = $aArgs['Contact'];
         if ($oContact instanceof \Aurora\Modules\Contacts\Models\Contact) {
-            $mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->{'DavContacts::UID'}, $this->getStorage($oContact->Storage));
 
-            return true;
+            $sStorage = '';
+            if ($oContact->Storage === StorageType::AddressBook) {
+                $oAddressBook = AddressBook::firstWhere('Id', $oContact->AddressBookId);
+                if ($oAddressBook) {
+                    $sStorage = $oAddressBook->UUID;
+                }
+            } else {
+                $sStorage = $this->getStorage($oContact->Storage);
+            }
+            $mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->{'DavContacts::UID'}, $sStorage);
+
+            return !empty($mResult);
         }
     }
 
