@@ -12,7 +12,7 @@ use Aurora\Api;
 use Aurora\Modules\Contacts\Enums\Access;
 use Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\Modules\Contacts\Models\AddressBook;
-use Aurora\Modules\Contacts\Models\Contact;
+use \Aurora\Modules\Contacts\Models\Contact;
 use Aurora\Modules\Contacts\Models\Group;
 
 /**
@@ -37,6 +37,17 @@ class Module extends \Aurora\System\Module\AbstractModule
     protected $__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = false;
     protected $__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = false;
 
+    /**
+     * @return Module
+     */
+    public static function Decorator()
+    {
+        return parent::Decorator();
+    }
+
+    /**
+     * @return Manager
+     */
     public function getManager()
     {
         if ($this->oManager === null) {
@@ -76,7 +87,11 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     /**
      *
-     * @param type $sUID
+     * @param int $iUserId
+     * @param string $sStorage
+     * @param string $sUID
+     * 
+     * @return Contact
      */
     protected function getContact($iUserId, $sStorage, $sUID)
     {
@@ -85,13 +100,22 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     /**
      *
-     * @param type $sUID
+     * @param int $iUserId
+     * @param string $sUID
+     * 
+     * @return Group
      */
     protected function getGroup($iUserId, $sUID)
     {
         return Group::where('IdUser', $iUserId)->where('Properties->' . self::GetName() . '::UID', $sUID)->first();
     }
 
+    /**
+     *
+     * @param string $sStorage
+     * 
+     * @return string
+     */
     protected function getStorage($sStorage)
     {
         $sResult = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME;
@@ -112,6 +136,9 @@ class Module extends \Aurora\System\Module\AbstractModule
      *
      * @param int $UserId
      * @param string $VCard
+     * @param string $UID
+     * @param string $Storage
+     * 
      * @return bool|string
      * @throws \Aurora\System\Exceptions\ApiException
      */
@@ -201,7 +228,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
 
         $this->__LOCK_AFTER_UPDATE_CONTACT_SUBSCRIBE__ = true;
-        /* @var $oContact \Aurora\Modules\Contacts\Classes\Contact */
+        /* @var $oContact \Aurora\Modules\Contacts\Models\Contact */
         $oContact = $this->getContact($UserId, $Storage, $UUID);
 
         if ($oContact) {
@@ -263,7 +290,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         if (!$this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ && isset($aArgs["Contact"]["Storage"])) {
             \Aurora\System\Api::checkUserRoleIsAtLeast(\Aurora\System\Enums\UserRole::NormalUser);
-            $sUUID = isset($aResult) && isset($aResult['UUID']) ? $aResult['UUID'] : false;
+            $sUUID = is_array($aResult) && isset($aResult['UUID']) ? $aResult['UUID'] : false;
             if ($sUUID) {
                 $oContact = \Aurora\Modules\Contacts\Module::getInstance()->GetContact($sUUID, $aArgs['UserId']);
                 if ($oContact instanceof \Aurora\Modules\Contacts\Models\Contact) {
@@ -382,8 +409,9 @@ class Module extends \Aurora\System\Module\AbstractModule
             $bIsAuto = false;
             $iAddressBookId = 0;
             foreach ($aEntities as $oContact) {
+                /** @var Contact $oContact */
                 if (\Aurora\Modules\Contacts\Module::Decorator()->CheckAccessToObject($oUser, $oContact, Access::Write)) {
-                    $aUIDs[] = $oContact->{'DavContacts::UID'};
+                    $aUIDs[] = $oContact->{'DavContacts::UID'}; /** @phpstan-ignore-line */
                     $sStorage = $sContactStorage = $oContact->Storage; // TODO: sash04ek
                     $bIsAuto = $oContact->Auto;
 
@@ -457,7 +485,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     /**
      * @param array $aArgs
-     * @param array $aResult
+     * @param array $mResult
      */
     public function onBeforDeleteGroup(&$aArgs, &$mResult)
     {
@@ -525,7 +553,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     if (isset($fromStorage, $toStorage)) {
                         $this->getManager()->copyContact(
                             $aArgs['UserId'],
-                            $oContact->{'DavContacts::UID'},
+                            $oContact->{'DavContacts::UID'}, /** @phpstan-ignore-line */
                             $fromStorage,
                             $toStorage
                         );
@@ -563,7 +591,8 @@ class Module extends \Aurora\System\Module\AbstractModule
             } else {
                 $sStorage = $this->getStorage($oContact->Storage);
             }
-            $mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $oContact->{'DavContacts::UID'}, $sStorage);
+            $DavContactsUid = $oContact->{'DavContacts::UID'};/** @phpstan-ignore-line */
+            $mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $DavContactsUid, $sStorage);
 
             return !empty($mResult);
         }

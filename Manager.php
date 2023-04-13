@@ -15,13 +15,18 @@ namespace Aurora\Modules\DavContacts;
 class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 {
     /**
+     * @var Storages\Sabredav
+     */
+    public $oStorage;
+
+    /**
      * Creates a new instance of the object.
      *
-     * @param \Aurora\System\Module\AbstractModule $oModule
+     * @param \Aurora\Modules\DavContacts\Module $oModule
      */
-    public function __construct(\Aurora\System\Module\AbstractModule $oModule = null)
+    public function __construct($oModule = null)
     {
-        parent::__construct($oModule, new Storages\Sabredav\Storage($this));
+        parent::__construct($oModule, new Storages\Sabredav($this));
     }
 
     /**
@@ -30,7 +35,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      * @param int $iUserId
      * @param mixed $mContactId
      *
-     * @return \Aurora\Modules\Contacts\Classes\Contact|bool
+     * @return \Aurora\Modules\Contacts\Models\Contact|bool
      */
     public function getContactById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
     {
@@ -38,36 +43,9 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         try {
             $oContact = $this->oStorage->getContactById($iUserId, $mContactId, $sAddressBookName);
             if ($oContact) {
-                $mGroupIds = $this->getContactGroupIds($oContact);
-                if (is_array($mGroupIds)) {
-                    $oContact->GroupIds = $mGroupIds;
-                }
-            }
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $oContact = false;
-            $this->setLastException($oException);
-        }
-
-        return $oContact;
-    }
-
-    /**
-     * //TODO
-     *
-     * @param mixed $mTypeId
-     * @param int $iContactType
-     *
-     * @return \Aurora\Modules\Contacts\Classes\Contact|bool
-     */
-    public function GetContactByTypeId($mTypeId, $iContactType)
-    {
-        $oContact = null;
-        try {
-            $oContact = $this->oStorage->GetContactByTypeId($mTypeId, $iContactType);
-            if ($oContact) {
-                $mGroupIds = $this->getContactGroupIds($oContact);
-                if (is_array($mGroupIds)) {
-                    $oContact->GroupIds = $mGroupIds;
+                $aGroupIds = $this->getContactGroupIds($oContact);
+                if (is_array($aGroupIds) > 0) {
+                    $oContact->Groups()->sync($aGroupIds, false);
                 }
             }
         } catch (\Aurora\System\Exceptions\BaseException $oException) {
@@ -84,7 +62,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      * @param int $iUserId
      * @param string $sEmail
      *
-     * @return \Aurora\Modules\Contacts\Classes\Contact|bool
+     * @return \Aurora\Modules\Contacts\Models\Contact|bool
      */
     public function getContactByEmail($iUserId, $sEmail)
     {
@@ -92,9 +70,9 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         try {
             $oContact = $this->oStorage->getContactByEmail($iUserId, $sEmail);
             if ($oContact) {
-                $mGroupIds = $this->getContactGroupIds($oContact);
-                if (is_array($mGroupIds)) {
-                    $oContact->GroupIds = $mGroupIds;
+                $aGroupIds = $this->getContactGroupIds($oContact);
+                if (is_array($aGroupIds)) {
+                    $oContact->Groups()->sync($aGroupIds, false);
                 }
             }
         } catch (\Aurora\System\Exceptions\BaseException $oException) {
@@ -112,7 +90,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      * @param string $sContactStrId
      * @param int $iSharedTenantId. Default value is **null**
      *
-     * @return \Aurora\Modules\Contacts\Classes\Contact
+     * @return \Aurora\Modules\Contacts\Models\Contact
      */
     public function getContactByStrId($iUserId, $sContactStrId, $iSharedTenantId = null)
     {
@@ -120,9 +98,9 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         try {
             $oContact = $this->oStorage->getContactByStrId($iUserId, $sContactStrId, $iSharedTenantId);
             if ($oContact) {
-                $mGroupIds = $this->getContactGroupIds($oContact);
-                if (is_array($mGroupIds)) {
-                    $oContact->GroupIds = $mGroupIds;
+                $aGroupIds = $this->getContactGroupIds($oContact);
+                if (is_array($aGroupIds)) {
+                    $oContact->Groups()->sync($aGroupIds, false);
                 }
             }
         } catch (\Aurora\System\Exceptions\BaseException $oException) {
@@ -158,28 +136,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * Returns list of shared contacts by str_id value.
-     *
-     * @param int $iUserId
-     * @param int $iSharedTenantId Default value is **null**
-     *
-     * @return array|bool
-     */
-    public function getSharedContactIds($iUserId, $iSharedTenantId = null)
-    {
-        $aContactIds = array();
-        try {
-            $aContactIds = $this->oStorage->getSharedContactIds($iUserId, $iSharedTenantId);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $aContactIds = false;
-            $this->setLastException($oException);
-        }
-
-        return $aContactIds;
-    }
-
-    /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      *
      * @return array|bool
      */
@@ -200,7 +157,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      * @param int $iUserId
      * @param mixed $mGroupId
      *
-     * @return \Aurora\Modules\Contacts\Classes\Group
+     * @return \Aurora\Modules\Contacts\Models\Group
      */
     public function getGroupById($iUserId, $mGroupId)
     {
@@ -219,7 +176,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
      * @param int $iUserId
      * @param string $sGroupStrId
      *
-     * @return \Aurora\Modules\Contacts\Classes\Group
+     * @return \Aurora\Modules\Contacts\Models\Group
      */
     public function getGroupByStrId($iUserId, $sGroupStrId)
     {
@@ -235,26 +192,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param int $iUserId
-     * @param string $sName
-     *
-     * @return \Aurora\Modules\Contacts\Classes\Group
-     */
-    public function getGroupByName($iUserId, $sName)
-    {
-        $oGroup = null;
-        try {
-            $oGroup = $this->oStorage->getGroupByName($iUserId, $sName);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $oGroup = false;
-            $this->setLastException($oException);
-        }
-
-        return $oGroup;
-    }
-
-    /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      *
      * @return bool
      */
@@ -284,7 +222,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      * @param int $iUserId
      *
      * @return string
@@ -305,7 +243,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @return bool
      */
     public function updateGroup($oGroup)
@@ -416,16 +354,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
 
     /**
      * @param int $iUserId
-     *
-     * @return \Aurora\Modules\Contacts\Classes\Contact|null
-     */
-    public function GetMyGlobalContact($iUserId)
-    {
-        return $this->oStorage->GetMyGlobalContact($iUserId);
-    }
-
-    /**
-     * @param int $iUserId
      * @param string $sSearch Default value is empty string
      * @param string $sFirstCharacter Default value is empty string
      *
@@ -488,25 +416,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
-     *
-     * @return bool|array
-     */
-    public function GetAllContactsNamesWithPhones($oAccount)
-    {
-        $mResult = false;
-        try {
-            $mResult = array(); // TODO
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $mResult = false;
-            $this->setLastException($oException);
-        }
-
-        return $mResult;
-    }
-
-    /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      *
      * @return bool
      */
@@ -547,7 +457,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      *
      * @return bool
      */
@@ -603,24 +513,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         $bResult = false;
         try {
             $bResult = $this->oStorage->deleteSuggestContacts($iUserId, $aContactIds);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $bResult = false;
-            $this->setLastException($oException);
-        }
-        return $bResult;
-    }
-
-    /**
-     * @param int $iUserId
-     * @param array $aGroupIds
-     *
-     * @return bool
-     */
-    public function deleteGroups($iUserId, $aGroupIds)
-    {
-        $bResult = false;
-        try {
-            $bResult = $this->oStorage->deleteGroups($iUserId, $aGroupIds);
         } catch (\Aurora\System\Exceptions\BaseException $oException) {
             $bResult = false;
             $this->setLastException($oException);
@@ -692,7 +584,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @param array $aContactIds
      *
      * @return bool
@@ -710,7 +602,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @param array $aContactIds
      *
      * @return bool
@@ -720,173 +612,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         $bResult = false;
         try {
             $bResult = $this->oStorage->removeContactsFromGroup($oGroup, $aContactIds);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $bResult = false;
-            $this->setLastException($oException);
-        }
-        return $bResult;
-    }
-
-    /**
-     * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
-     * @param mixed $mContactId
-     * @param string $sStorage
-     *
-     * @return mixed
-     */
-    public function ConvertedContactLocalId($oAccount, $mContactId, $sStorage = 'global')
-    {
-        $mResult = null;
-        try {
-            $mResult = $this->oStorage->ConvertedContactLocalId($oAccount, $mContactId, $sStorage);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $this->setLastException($oException);
-        }
-        return $mResult;
-    }
-
-    /**
-     * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
-     * @param string $sStorage
-     *
-     * @return mixed
-     */
-    public function ConvertedContactLocalIdCollection($oAccount, $sStorage = 'global')
-    {
-        $aResult = array();
-        try {
-            $aResult = $this->oStorage->ConvertedContactLocalIdCollection($oAccount, $sStorage);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $this->setLastException($oException);
-        }
-        return $aResult;
-    }
-
-    /**
-     * @param array $aIds
-     *
-     * @return mixed
-     */
-    public function ContactIdsLinkedToGroups($aIds)
-    {
-        $aResult = array();
-        try {
-            $aResult = $this->oStorage->ContactIdsLinkedToGroups($aIds);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $this->setLastException($oException);
-        }
-        return $aResult;
-    }
-
-    /**
-     * @param int $iUserId
-     * @param mixed $mContactId
-     *
-     * @return \Aurora\Modules\Contacts\Classes\Contact|bool
-     */
-    public function GetGlobalContactById($iUserId, $mContactId)
-    {
-        $oContact = null;
-        try {
-            $oContact = $this->oStorage->GetGlobalContactById($iUserId, $mContactId);
-            if ($oContact) {
-                $mGroupIds = $this->getContactGroupIds($oContact);
-                if (is_array($mGroupIds)) {
-                    $oContact->GroupIds = $mGroupIds;
-                }
-            }
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $oContact = false;
-            $this->setLastException($oException);
-        }
-
-        return $oContact;
-    }
-
-    /**
-     * @param int $iGroupId
-     *
-     * @return bool
-     */
-    public function getGroupEvents($iGroupId)
-    {
-        $bResult = false;
-        try {
-            $bResult = $this->oStorage->getGroupEvents($iGroupId);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $bResult = false;
-            $this->setLastException($oException);
-        }
-        return $bResult;
-    }
-
-    /**
-     * @param string $sCalendarId
-     * @param string $sEventId
-     *
-     * @return bool
-     */
-    public function getGroupEvent($sCalendarId, $sEventId)
-    {
-        $bResult = false;
-        try {
-            $bResult = $this->oStorage->getGroupEvent($sCalendarId, $sEventId);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $bResult = false;
-            $this->setLastException($oException);
-        }
-        return $bResult;
-    }
-
-    /**
-     * @param int $iGroupId
-     * @param string $sCalendarId
-     * @param string $sEventId
-     *
-     * @return bool
-     */
-    public function addEventToGroup($iGroupId, $sCalendarId, $sEventId)
-    {
-        $bResult = false;
-        try {
-            $bResult = $this->oStorage->addEventToGroup($iGroupId, $sCalendarId, $sEventId);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $bResult = false;
-            $this->setLastException($oException);
-        }
-        return $bResult;
-    }
-
-    /**
-     * @param int $iGroupId
-     * @param string $sCalendarId
-     * @param string $sEventId
-     *
-     * @return bool
-     */
-    public function removeEventFromGroup($iGroupId, $sCalendarId, $sEventId)
-    {
-        $bResult = false;
-        try {
-            $bResult = $this->oStorage->removeEventFromGroup($iGroupId, $sCalendarId, $sEventId);
-        } catch (\Aurora\System\Exceptions\BaseException $oException) {
-            $bResult = false;
-            $this->setLastException($oException);
-        }
-        return $bResult;
-    }
-
-    /**
-     * @param string $sCalendarId
-     * @param string $sEventId
-     *
-     * @return bool
-     */
-    public function removeEventFromAllGroups($sCalendarId, $sEventId)
-    {
-        $bResult = false;
-        try {
-            $bResult = $this->oStorage->removeEventFromAllGroups($sCalendarId, $sEventId);
         } catch (\Aurora\System\Exceptions\BaseException $oException) {
             $bResult = false;
             $this->setLastException($oException);

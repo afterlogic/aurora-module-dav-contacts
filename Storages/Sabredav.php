@@ -5,7 +5,7 @@
  * For full statements of the licenses see LICENSE-AFTERLOGIC and LICENSE-AGPL3 files.
  */
 
-namespace Aurora\Modules\DavContacts\Storages\Sabredav;
+namespace Aurora\Modules\DavContacts\Storages;
 
 use Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\Modules\Contacts\Models\AddressBook;
@@ -18,29 +18,18 @@ use Sabre\DAV\PropPatch;
  * @license https://afterlogic.com/products/common-licensing Afterlogic Software License
  * @copyright Copyright (c) 2023, Afterlogic Corp.
  */
-class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
+class Sabredav extends \Aurora\System\Managers\AbstractStorage
 {
     /**
      * @var string
      */
     public $Principal;
 
-    /**
-     * @var \Aurora\Modules\StandardAuth\Classes\Account
-     */
-    //	protected $Account;
-
-    /**
-     * @var $oApiUsersManager CApiUsersManager
-     */
-    protected $ApiUsersManager;
-
     protected $aAddressBooksCache;
     protected $aContactItemsCache;
     protected $aGroupItemsCache;
     protected $ContactsCache;
     protected $InitialisedUserId;
-    //	protected $AccountsCache;
     protected $GroupsCache;
     protected $CoreModuleDecorator;
 
@@ -52,29 +41,24 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     {
         parent::__construct($oManager);
 
-        //		$this->Account = null;
-
         $this->aAddressBooksCache = array();
         $this->aContactItemsCache = array();
         $this->aGroupItemsCache = array();
 
         $this->ContactsCache = array();
         $this->GroupsCache = array();
-        //		$this->AccountsCache = array();
 
         $this->CoreModuleDecorator = \Aurora\System\Api::GetModuleDecorator('Core');
     }
 
     /**
-     * @param \Aurora\Modules\StandardAuth\Classes\Account $oAccount
+     * @param \Aurora\Modules\Core\Models\User $oUser
      */
     public function InitByUser($oUser = null)
     {
         $bResult = false;
 
-        //		if ($oAccount && (!$this->Account || $this->Account->Email !== $oAccount->Email))
         if ($oUser) {
-            //			$this->Account = $oAccount;
             $this->aAddressBooksCache = array();
             $this->aContactItemsCache = array();
             $this->aGroupItemsCache = array();
@@ -82,8 +66,6 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
             $this->ContactsCache = array();
             $this->GroupsCache = array();
 
-            //			\Afterlogic\DAV\Server::getInstance()->setAccount($oAccount);
-            //			$aPrincipalProperties = \Afterlogic\DAV\Backend::Principal()->getPrincipalByPath(\Afterlogic\DAV\Constants::PRINCIPALS_PREFIX . $oAccount->Email);
             $aPrincipalProperties = \Afterlogic\DAV\Backend::Principal()->getPrincipalByPath(\Afterlogic\DAV\Constants::PRINCIPALS_PREFIX . $oUser->PublicId);
             if ($aPrincipalProperties) {
                 if (isset($aPrincipalProperties['uri'])) {
@@ -93,26 +75,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
             $bResult = true;
         }
 
-        //		if ($this->Account)
-        //		{
-        //			$bResult = true;
-        //		}
-
         return $bResult;
     }
-
-//	protected function GetDefaultAccountByUserId($iUserId)
-//	{
-//		if (!isset($this->AccountsCache[$iUserId]))
-//		{
-//			$iAccountId = $this->ApiUsersManager->getDefaultAccountId($iUserId);
-//			$oAccount = $this->ApiUsersManager->getAccountById($iAccountId);
-//			$this->AccountsCache[$iUserId] = $oAccount;
-//		}
-//
-//		return $this->AccountsCache[$iUserId];
-//	}
-
 
     /**
      * @param int $iUserId
@@ -134,7 +98,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
      * @param int $iUserId
      * @param mixed $mContactId
      * @param string $sAddressBookName
-     * @return \Aurora\Modules\Contacts\Classes\Contact | false
+     * @return \Aurora\Modules\Contacts\Models\Contact | false
      */
     public function getContactById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
     {
@@ -147,7 +111,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
             if ($sVCardData) {
                 $oContact = new \Aurora\Modules\Contacts\Models\Contact();
                 $oContact->InitFromVCardStr($iUserId, $sVCardData);
-                $oContact->IdContact = $mContactId;
+                $oContact->setExtendedProp('DavContacts::UID', $mContactId);
                 $oContact->ETag = trim($oContactItem->getETag(), '"');
             }
         }
@@ -159,7 +123,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
      * @param int $iUserId
      * @param mixed $mContactId
      * @param string $sAddressBookName
-     * @return \Aurora\Modules\Contacts\Classes\Contact | false
+     * @return \Sabre\CardDAV\Card|bool
      */
     public function getVCardObjectById($iUserId, $mContactId, $sAddressBookName = \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME)
     {
@@ -174,7 +138,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     /**
      * @param int $iUserId
      * @param string $sEmail
-     * @return \Aurora\Modules\Contacts\Classes\Contact|bool
+     * @return \Aurora\Modules\Contacts\Models\Contact|bool
      */
     public function getContactByEmail($iUserId, $sEmail)
     {
@@ -185,7 +149,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
      * @param int $iUserId
      * @param string $sContactStrId
      * @param int $iSharedTenantId = null
-     * @return \Aurora\Modules\Contacts\Classes\Contact|bool
+     * @return \Aurora\Modules\Contacts\Models\Contact|bool
      */
     public function getContactByStrId($iUserId, $sContactStrId, $iSharedTenantId = null)
     {
@@ -195,7 +159,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     /**
      * @param int $iUserId
      * @param string $sContactStrId
-     * @return \Aurora\Modules\Contacts\Classes\Contact
+     * @return \Aurora\Modules\Contacts\Models\Contact
      */
     public function GetSuggestContactByEmail($iUserId, $sContactStrId)
     {
@@ -203,18 +167,20 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      * @return array|bool
      */
     public function getContactGroupIds($oContact)
     {
-        return $oContact->GroupIds;
+        return $oContact->Groups()->map(function ($oGroup) {
+            return $oGroup->Id;
+        })->toArray();
     }
 
     /**
      * @param int $iUserId
      * @param mixed $mGroupId
-     * @return \Aurora\Modules\Contacts\Classes\Group
+     * @return \Aurora\Modules\Contacts\Models\Group
      */
     public function getGroupById($iUserId, $mGroupId)
     {
@@ -231,8 +197,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
                     if (isset($this->aGroupItemsCache[$oAddressBook->getName()][$mGroupId])) {
                         $bResult = new \Aurora\Modules\Contacts\Models\Group();
                         $bResult->IdUser = $iUserId;
-                        $bResult->IdGroup = $mGroupId;
-                        $bResult->IdGroupStr = $mGroupId;
+                        $bResult->UUID = $mGroupId;
                         $bResult->Name =  $mGroupId;
                     }
                 }
@@ -249,7 +214,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     /**
      * @param int $iUserId
      * @param string $sGroupStrId
-     * @return \Aurora\Modules\Contacts\Classes\Group
+     * @return \Aurora\Modules\Contacts\Models\Group
      */
     public function getGroupByStrId($iUserId, $sGroupStrId)
     {
@@ -259,7 +224,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     /**
      * @param mixed $iUserId
      * @param string $sName
-     * @return bool|array
+     * @return \Afterlogic\DAV\CardDAV\AddressBook|bool
      */
     public function getAddressBook($iUserId, $sName)
     {
@@ -401,10 +366,10 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
     /**
      * @param int $iUserId
-     * @param \Afterlogic\DAV\CardDAV\AddressBook
+     * @param \Afterlogic\DAV\CardDAV\AddressBook $oAddressBook
      * @param string $sSearch
-     * @param string $sFirstCharacter = ''
-     * @param int $sGroupId
+     * @param string $sFirstCharacter
+     * @param string $sGroupId
      * @return bool|array
      */
     protected function getItems($iUserId, $oAddressBook, $sSearch = '', $sFirstCharacter = '', $sGroupId = null)
@@ -479,7 +444,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
                             stripos($sLastName, $sSearch) !== false ||
                             stripos($sNickName, $sSearch) !== false ||
                             stripos($sTitle, $sSearch) !== false || $bFindEmail) &&
-                            (empty($sGroupId) || (!empty($sGroupId) && strpos($sCategories, $sGroupId) !== false))) {
+                            ($sGroupId || (!$sGroupId && strpos($sCategories, $sGroupId) !== false))) {
                             $oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
                             $oContactItem->InitBySabreCardDAVCard($oVCard);
                             $oContactItem->Id = $sItemId;
@@ -499,7 +464,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
     /**
      * @param int $iUserId
-     * @param \Afterlogic\DAV\CardDAV\AddressBook
+     * @param \Afterlogic\DAV\CardDAV\AddressBook $oAddressBook
      * @return void
      */
     protected function initGroupItems($iUserId, $oAddressBook)
@@ -678,7 +643,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
         if (!empty($sContactId)) {
             $oContact = $this->getContactById($iUserId, $sContactId);
             if ($oContact) {
-                foreach ($oContact->GroupIds as $sGroupId) {
+                $aGroupIds = $this->getContactGroupIds($oContact);
+                foreach ($aGroupIds as $sGroupId) {
                     $oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
                     $oContactItem->Id = (string) $sGroupId;
                     $oContactItem->Name = (string) $sGroupId;
@@ -710,7 +676,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
                         $oContactItem->Name = $sKey;
                         $oContactItem->IsGroup = true;
 
-                        if (empty($sContactId) || !empty($sContactId) && in_array($sContactId, $aContactIds)) {
+                        if ($sContactId || (!$sContactId && in_array($sContactId, $aContactIds))) {
                             if ($sSearch == '' || stripos($oContactItem->Name, $sSearch) !== false) {
                                 $aResult[] = $oContactItem;
                             }
@@ -814,7 +780,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      * @param int $iUserId
      * @return string
      */
@@ -843,7 +809,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      * @return bool
      */
     public function updateContact($oContact)
@@ -866,16 +832,10 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
             }
         }
 
-        $oContactItem = $oAddressBook ? $this->geItem($iUserId, $oAddressBook, $oContact->{'DavContacts::UID'} . '.vcf') : null;
+        $sDavContactsUID = $oContact->getExtendedProp('DavContacts::UID');
+        $oContactItem = $oAddressBook ? $this->geItem($iUserId, $oAddressBook, $sDavContactsUID . '.vcf') : null;
         if ($oContactItem) {
             $sData = $oContactItem->get();
-            /*
-                        $sETag = md5($sData);
-                        if ($oContact->ETag !== $sETag)
-                        {
-                            throw new \Aurora\System\Exceptions\BaseException(Errs::Sabre_PreconditionFailed);
-                        }
-             */
 
             $oVCard = \Sabre\VObject\Reader::read($sData);
             if ($oVCard) {
@@ -914,7 +874,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @return bool
      */
     public function updateGroup($oGroup)
@@ -922,7 +882,8 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
         $bResult = false;
 
         $oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-        $oGroupItem = $oAddressBook ? $this->geItem($oGroup->IdUser, $oAddressBook, $oGroup->{'DavContacts::UID'} . '.vcf') : null;
+        $sDavContactsUID = $oGroup->getExtendedProp('DavContacts::UID');
+        $oGroupItem = $oAddressBook ? $this->geItem($oGroup->IdUser, $oAddressBook, $sDavContactsUID . '.vcf') : null;
         if ($oGroupItem) {
             $sData = $oGroupItem->get();
 
@@ -958,13 +919,13 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Contact $oContact
+     * @param \Aurora\Modules\Contacts\Models\Contact $oContact
      * @return bool
      */
     public function createContact($oContact)
     {
         $bResult = false;
-        if (isset($oContact)) {
+        if ($oContact) {
             $this->init($oContact->IdUser);
             $oAddressBook = null;
             if ($oContact->Storage === StorageType::Personal) {
@@ -984,23 +945,13 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
                 }
             }
             if ($oAddressBook) {
-                $oContact->{'DavContacts::UID'} .= '.vcf';
+                $sDavContactsUID = $oContact->{'DavContacts::UID'} .= '.vcf'; /** @phpstan-ignore-line */
 
                 $oVCard = new \Sabre\VObject\Component\VCard();
                 \Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
-                $oAddressBook->createFile($oContact->{'DavContacts::UID'}, $oVCard->serialize());
+                $oAddressBook->createFile($sDavContactsUID, $oVCard->serialize());
                 $bResult = true;
             }
-            /*
-             *  for collected addressbook
-             *
-             *
-                        $oAddressBook = $this->getAddressBook($oContact->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME);
-                        $aContactIds = $this->searchContactItemsByEmail($oContact->IdUser, $oContact->ViewEmail, $oAddressBook);
-
-                        $this->deleteContactsByAddressBook($oContact->IdUser, $aContactIds, $oAddressBook);
-             *
-             */
         }
 
         return $bResult;
@@ -1027,7 +978,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @return bool
      */
     public function createGroup($oGroup)
@@ -1057,7 +1008,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
         }
 
         $oAddressBook = $this->getAddressBook($oGroup->IdUser, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-        $oAddressBook->createFile($oGroup->{'DavContacts::UID'} . '.vcf', $oVCard->serialize());
+        $oAddressBook->createFile($oGroup->getExtendedProp('DavContacts::UID') . '.vcf', $oVCard->serialize());
 
 
         return true; //$this->updateGroup($oGroup);
@@ -1066,7 +1017,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     /**
      * @param int $iUserId
      * @param array $aContactIds
-     * @param \Afterlogic\DAV\CardDAV\AddressBook
+     * @param \Afterlogic\DAV\CardDAV\AddressBook $oAddressBook
      * @return bool
      */
     protected function deleteContactsByAddressBook($iUserId, $aContactIds, $oAddressBook)
@@ -1114,17 +1065,17 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
 
     /**
      * @param int $iUserId
-     * @param string $aGroupIds
+     * @param string $sGroupId
      * @return bool
      */
-    public function deleteGroup($iUserId, $iGroupId)
+    public function deleteGroup($iUserId, $sGroupId)
     {
         $this->init($iUserId);
 
         $oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
         if ($oAddressBook) {
-            if ($oAddressBook->childExists($iGroupId . '.vcf')) {
-                $oChild = $oAddressBook->getChild($iGroupId . '.vcf');
+            if ($oAddressBook->childExists($sGroupId . '.vcf')) {
+                $oChild = $oAddressBook->getChild($sGroupId . '.vcf');
                 $oChild->delete();
                 return true;
             }
@@ -1214,42 +1165,6 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param int $iUserId
-     * @param array $aContactIds
-     * @return bool
-     */
-//	public function DeleteContactsExceptIds($iUserId, $aContactIds)
-//	{
-//		$this->init($iUserId);
-//
-//		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
-//		if ($oAddressBook)
-//		{
-//			$aContactItems = $this->getObjectItems($iUserId);
-//			foreach ($aContactItems as $oContactItem)
-//			{
-//				$vCard = \Sabre\VObject\Reader::read($oContactItem->get());
-//				if (isset($vCard->UID) && !in_array((string)$vCard->UID, $aContactIds))
-//				{
-//					$oContactItem->delete();
-//				}
-//			}
-//			return true;
-//		}
-//		return false;
-//	}
-
-    /**
-     * @param int $iUserId
-     * @param array $aGroupIds
-     * @return bool
-     */
-//	public function DeleteGroupsExceptIds($iUserId, $aGroupIds)
-//	{
-//		return true;
-//	}
-
-    /**
      * @return bool
      */
     public function flushContacts()
@@ -1286,7 +1201,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @param array $aContactIds
      * @return bool
      */
@@ -1296,7 +1211,7 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
     }
 
     /**
-     * @param \Aurora\Modules\Contacts\Classes\Group $oGroup
+     * @param \Aurora\Modules\Contacts\Models\Group $oGroup
      * @param array $aContactIds
      * @return bool
      */
@@ -1308,8 +1223,13 @@ class Storage extends \Aurora\Modules\DavContacts\Storages\Storage
             foreach ($aContactIds as $sContactId) {
                 $oContact = $this->getContactById($oGroup->IdUser, $sContactId);
                 if ($oContact) {
-                    $aGroupIds = $oContact->GroupIds;
-                    $oContact->GroupIds = array_diff($aGroupIds, array($oGroup->Name));
+                    $aGroupIds = $this->getContactGroupIds($oContact);
+                    
+                    $oContact->Groups()->sync(
+                        $aGroupIds,
+                        false
+                    );
+
                     $bResult = $this->updateContact($oContact);
                 }
             }
