@@ -172,7 +172,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
      */
     public function getContactGroupIds($oContact)
     {
-        return $oContact->Groups()->map(function ($oGroup) {
+        return $oContact->Groups->map(function ($oGroup) {
             return $oGroup->Id;
         })->toArray();
     }
