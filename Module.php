@@ -12,7 +12,7 @@ use Aurora\Api;
 use Aurora\Modules\Contacts\Enums\Access;
 use Aurora\Modules\Contacts\Enums\StorageType;
 use Aurora\Modules\Contacts\Models\AddressBook;
-use \Aurora\Modules\Contacts\Models\Contact;
+use Aurora\Modules\Contacts\Models\Contact;
 use Aurora\Modules\Contacts\Models\Group;
 
 /**
@@ -90,7 +90,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param int $iUserId
      * @param string $sStorage
      * @param string $sUID
-     * 
+     *
      * @return Contact
      */
     protected function getContact($iUserId, $sStorage, $sUID)
@@ -102,7 +102,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      *
      * @param int $iUserId
      * @param string $sUID
-     * 
+     *
      * @return Group
      */
     protected function getGroup($iUserId, $sUID)
@@ -113,7 +113,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     /**
      *
      * @param string $sStorage
-     * 
+     *
      * @return string
      */
     protected function getStorage($sStorage)
@@ -138,7 +138,7 @@ class Module extends \Aurora\System\Module\AbstractModule
      * @param string $VCard
      * @param string $UID
      * @param string $Storage
-     * 
+     *
      * @return bool|string
      * @throws \Aurora\System\Exceptions\ApiException
      */
@@ -581,7 +581,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         $oContact = $aArgs['Contact'];
         if ($oContact instanceof \Aurora\Modules\Contacts\Models\Contact) {
-
             $sStorage = '';
             if ($oContact->Storage === StorageType::AddressBook) {
                 $oAddressBook = AddressBook::firstWhere('Id', $oContact->AddressBookId);

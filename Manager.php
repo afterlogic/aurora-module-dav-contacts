@@ -321,8 +321,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         $iRequestLimit = 20,
         $aFilters = array(),
         $iIdGroup = 0
-    )
-    {
+    ) {
         $mResult = false;
         try {
             $mResult = $this->oStorage->getContactItems($iSortField, $iSortOrder, $iOffset, $iRequestLimit, $aFilters, $iIdGroup);
@@ -393,8 +392,7 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         $sSearch = '',
         $sFirstCharacter = '',
         $iContactId = 0
-    )
-    {
+    ) {
         $mResult = false;
         try {
             $mResult = $this->oStorage->getGroupItems(

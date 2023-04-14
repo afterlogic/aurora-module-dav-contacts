@@ -1224,7 +1224,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
                 $oContact = $this->getContactById($oGroup->IdUser, $sContactId);
                 if ($oContact) {
                     $aGroupIds = $this->getContactGroupIds($oContact);
-                    
+
                     $oContact->Groups()->sync(
                         $aGroupIds,
                         false
