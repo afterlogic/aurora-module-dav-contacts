@@ -429,7 +429,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             foreach ($aEntities as $oContact) {
                 /** @var Contact $oContact */
                 if (\Aurora\Modules\Contacts\Module::Decorator()->CheckAccessToObject($oUser, $oContact, Access::Write)) {
-                    $aUIDs[] = $oContact->{'DavContacts::UID'}; /** @phpstan-ignore-line */
+                    $aUIDs[] = $oContact->getExtendedProp('DavContacts::UID');
                     $sStorage = $sContactStorage = $oContact->Storage; // TODO: sash04ek
                     $bIsAuto = $oContact->Auto;
 
@@ -571,7 +571,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     if (isset($fromStorage, $toStorage)) {
                         $this->getManager()->copyContact(
                             $aArgs['UserId'],
-                            $oContact->{'DavContacts::UID'}, /** @phpstan-ignore-line */
+                            $oContact->getExtendedProp('DavContacts::UID'),
                             $fromStorage,
                             $toStorage
                         );
@@ -608,7 +608,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             } else {
                 $sStorage = $this->getStorage($oContact->Storage);
             }
-            $DavContactsUid = $oContact->{'DavContacts::UID'};/** @phpstan-ignore-line */
+            $DavContactsUid = $oContact->getExtendedProp('DavContacts::UID');
             $mResult = $this->getManager()->getVCardObjectById($oContact->IdUser, $DavContactsUid, $sStorage);
 
             return !empty($mResult);

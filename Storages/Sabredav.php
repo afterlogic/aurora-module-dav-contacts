@@ -945,7 +945,9 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
                 }
             }
             if ($oAddressBook) {
-                $sDavContactsUID = $oContact->{'DavContacts::UID'} .= '.vcf'; /** @phpstan-ignore-line */
+                
+                $sDavContactsUID = $oContact->getExtendedProp('DavContacts::UID') . '.vcf';
+                $oContact->setExtendedProp('DavContacts::UID', $sDavContactsUID);
 
                 $oVCard = new \Sabre\VObject\Component\VCard();
                 \Aurora\Modules\Contacts\Classes\VCard\Helper::UpdateVCardFromContact($oContact, $oVCard);
