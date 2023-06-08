@@ -379,7 +379,7 @@ class Module extends \Aurora\System\Module\AbstractModule
                     }
                     $oDavContact = $this->getManager()->getContactById(
                         $UserId,
-                        $oContact->{self::GetName() . '::UID'},
+                        $oContact->getExtendedProp(self::GetName() . '::UID'),
                         $sStorage
                     );
 
@@ -515,7 +515,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         );
 
         if ($oGroup instanceof \Aurora\Modules\Contacts\Models\Group) {
-            $mResult = $this->getManager()->deleteGroup($aArgs['UserId'], $oGroup->{$this->GetName() . '::UID'});
+            $mResult = $this->getManager()->deleteGroup($aArgs['UserId'], $oGroup->getExtendedProp($this->GetName() . '::UID'));
         }
     }
 

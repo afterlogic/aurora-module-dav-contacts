@@ -596,7 +596,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
         //		$oAddressBook = $this->getAddressBook($iUserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
         //		$aResult = $this->getItems($iUserId, $oAddressBook, $sSearch, $sFirstCharacter, $iGroupId);
         //		$this->sortItems($aResult, $iSortField, $iSortOrder);
-//
+        //
         //		return array_slice($aResult, $iOffset, $iRequestLimit);
     }
 
@@ -896,8 +896,8 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
                     $oContact = \Aurora\Modules\Contacts\Models\Contact::where('UUID', $oGroupContact->UUID)->first();
                     $sVCardUID = null;
                     if ($oContact->Storage !== 'team') {
-                        if (!empty($oContact->{'DavContacts::VCardUID'})) {
-                            $sVCardUID = $oContact->{'DavContacts::VCardUID'};
+                        if (!empty($oContact->getExtendedProp('DavContacts::VCardUID'))) {
+                            $sVCardUID = $oContact->getExtendedProp('DavContacts::VCardUID');
                         } else {
                             $sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
                         }
@@ -945,7 +945,6 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
                 }
             }
             if ($oAddressBook) {
-                
                 $sDavContactsUID = $oContact->getExtendedProp('DavContacts::UID') . '.vcf';
                 $oContact->setExtendedProp('DavContacts::UID', $sDavContactsUID);
 
@@ -962,8 +961,8 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
     protected function fixContactVCardUid($oAddressBook, $oContact)
     {
         $mResult = null;
-        if ($oAddressBook->childExists($oContact->{'DavContacts::UID'} . '.vcf')) {
-            $oChild = $oAddressBook->getChild($oContact->{'DavContacts::UID'} . '.vcf');
+        if ($oAddressBook->childExists($oContact->getExtendedProp('DavContacts::UID') . '.vcf')) {
+            $oChild = $oAddressBook->getChild($oContact->getExtendedProp('DavContacts::UID') . '.vcf');
             if ($oChild) {
                 $oVCard = \Sabre\VObject\Reader::read($oChild->get());
                 $sVCardUID = $oVCard->UID;
@@ -995,8 +994,8 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
             if ($oContact) {
                 $sVCardUID = null;
                 if ($oContact->Storage !== 'team') {
-                    if (!empty($oContact->{'DavContacts::VCardUID'})) {
-                        $sVCardUID = $oContact->{'DavContacts::VCardUID'};
+                    if (!empty($oContact->getExtendedProp('DavContacts::VCardUID'))) {
+                        $sVCardUID = $oContact->getExtendedProp('DavContacts::VCardUID');
                     } else {
                         $sVCardUID = $this->fixContactVCardUid($oAddressBook, $oContact);
                     }
