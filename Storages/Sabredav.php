@@ -85,7 +85,6 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
     {
         $bInitialized = true;
         if ($this->InitialisedUserId !== $iUserId) {
-            //		$oAccount = $this->GetDefaultAccountByUserId($iUserId);
             $oUser = \Aurora\Modules\Core\Module::Decorator()->GetUserWithoutRoleCheck($iUserId);
             $this->InitialisedUserId = $iUserId;
             $bInitialized = $this->InitByUser($oUser);
@@ -314,6 +313,20 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
         }
 
         return false;
+    }
+
+    public function deleteUserAddressBooks($iUserId)
+    {
+        $this->init($iUserId);
+
+        $oUserAddressBooks = new \Afterlogic\DAV\CardDAV\AddressBookRoot(
+            \Afterlogic\DAV\Backend::Carddav(),
+            $this->Principal
+        );
+
+        foreach ($oUserAddressBooks->getChildren() as $child) {
+            $child->delete();
+        }
     }
 
     /**

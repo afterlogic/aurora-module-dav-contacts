@@ -91,7 +91,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         $this->subscribeEvent('Contacts::AddContactsToGroup::after', array($this, 'onAfterAddContactsToGroup'));
         $this->subscribeEvent('Contacts::RemoveContactsFromGroup::after', array($this, 'onAfterRemoveContactsFromGroup'));
-        $this->subscribeEvent('Core::DeleteUser::after', array($this, 'onAfterDeleteUser'));
+        $this->subscribeEvent('Core::DeleteUser::before', array($this, 'onBeforDeleteUser'));
         $this->subscribeEvent('Contacts::UpdateSharedContacts::after', array($this, 'onAfterUpdateSharedContacts'), 90);
 
         $this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
@@ -101,6 +101,8 @@ class Module extends \Aurora\System\Module\AbstractModule
         $this->subscribeEvent('Contacts::CreateAddressBook::after', array($this, 'onAfterCreateAddressBook'));
         $this->subscribeEvent('Contacts::UpdateAddressBook::after', array($this, 'onAfterUpdateAddressBook'));
         $this->subscribeEvent('Contacts::DeleteAddressBook::before', array($this, 'onBeforeDeleteAddressBook'));
+
+        $this->subscribeEvent('Contacts::MoveContactsToStorage::after', array($this, 'onAfterMoveContactsToStorage'));
     }
 
     /**
@@ -547,9 +549,9 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
     }
 
-    public function onAfterDeleteUser(&$aArgs, &$mResult)
+    public function onBeforDeleteUser(&$aArgs, &$mResult)
     {
-        $this->getManager()->clearAllContactsAndGroups($aArgs['UserId']);
+        $this->getManager()->deleteUserAddressBooks($aArgs['UserId']);
     }
 
     public function onAfterUpdateSharedContacts($aArgs, &$mResult)
@@ -659,6 +661,66 @@ class Module extends \Aurora\System\Module\AbstractModule
                 $aArgs['UserId'],
                 $oAddressBook->UUID
             );
+        }
+    }
+
+    protected function getAddressBookFromStorage($UserId, $Storage)
+    {
+        $AddressBookId = null;
+        $aStorageParts = \explode('-', $Storage);
+        if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
+            $Storage = StorageType::AddressBook;
+            if (isset($aStorageParts[1])) {
+                $AddressBookId = (int) $aStorageParts[1];
+            }
+        }
+        $oAddressBook = false;
+        if ($Storage === StorageType::Personal) {
+            $oAddressBook = $this->getManager()->getAddressBook($UserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME);
+        } elseif ($Storage === StorageType::Shared) {
+            $oAddressBook = $this->getManager()->getAddressBook($UserId, \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME);
+        } elseif ($Storage === StorageType::Team) {
+            $oAddressBook = true;
+        } elseif ($Storage === StorageType::AddressBook) {
+            $oAddressBook = AddressBook::where('Id', $AddressBookId)
+                ->where('UserId', $UserId)->first();
+
+            if ($oAddressBook) {
+                $oAddressBook = $this->getManager()->getAddressBook($UserId, $oAddressBook->UUID);
+            }
+        }
+
+        return $oAddressBook;
+    }
+
+    public function onAfterMoveContactsToStorage($aArgs, &$mResult)
+    {
+        if (key_exists('FromStorage', $aArgs) && key_exists('ToStorage', $aArgs)) {
+
+            $ToAddressBookId = null;
+            $ToStorage = $aArgs['ToStorage'];
+            $aStorageParts = \explode('-', $aArgs['ToStorage']);
+            $query = \Aurora\Modules\Contacts\Models\Contact::where('IdUser', $aArgs['UserId']);
+            if (isset($aStorageParts[0]) && $aStorageParts[0] === StorageType::AddressBook) {
+                $ToStorage = $aStorageParts[0];
+                if (isset($aStorageParts[1])) {
+                    $ToAddressBookId = (int) $aStorageParts[1];
+                    $query = $query->where('AddressBookId', $ToAddressBookId);
+                }
+            }
+            $contactsColl = $query->where('Storage', $ToStorage)->whereIn('UUID', $aArgs['UUIDs'])->get();
+
+            $fromAddressbook =  $this->getAddressBookFromStorage($aArgs['UserId'], $aArgs['FromStorage']);
+            $toAddressbook =  $this->getAddressBookFromStorage($aArgs['UserId'], $aArgs['ToStorage']);
+
+            foreach ($contactsColl as $oContact) {
+                $this->getManager()->copyContact(
+                    $aArgs['UserId'],
+                    $oContact->getExtendedProp('DavContacts::UID'),
+                    $fromAddressbook->getName(),
+                    $toAddressbook->getName()
+                );
+            }
         }
     }
 }

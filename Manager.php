@@ -491,14 +491,6 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
             $this->setLastException($oException);
         }
 
-        if ($bResult) {
-            //			$oApiVoiceManager = /* @var $oApiVoiceManager \CApiVoiceManager */\Aurora\System\Api::Manager('voice');
-            //			if ($oApiVoiceManager)
-            //			{
-            //				$oApiVoiceManager->flushCallersNumbersCache($iUserId);
-            //			}
-        }
-
         return $bResult;
     }
 
@@ -660,6 +652,19 @@ class Manager extends \Aurora\System\Managers\AbstractManagerWithStorage
         $bResult = false;
         try {
             $bResult = $this->oStorage->deleteAddressBook($iUserId, $sName);
+        } catch (\Aurora\System\Exceptions\BaseException $oException) {
+            $bResult = false;
+            $this->setLastException($oException);
+        }
+        return $bResult;
+    }
+
+    public function deleteUserAddressBooks($iUserId)
+    {
+        $bResult = false;
+        try {
+            $this->oStorage->deleteUserAddressBooks($iUserId);
+            $bResult = true;
         } catch (\Aurora\System\Exceptions\BaseException $oException) {
             $bResult = false;
             $this->setLastException($oException);
