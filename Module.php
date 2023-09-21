@@ -177,6 +177,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         $aContactData = \Aurora\Modules\Contacts\Classes\VCard\Helper::GetContactDataFromVcard($oVCard);
         $aContactData['Storage'] = $Storage;
+        $aContactData['UUID'] = $UID;
 
         $this->__LOCK_AFTER_CREATE_CONTACT_SUBSCRIBE__ = true;
         $mResult = $oContactsDecorator->CreateContact($aContactData, $UserId);
@@ -696,7 +697,6 @@ class Module extends \Aurora\System\Module\AbstractModule
     public function onAfterMoveContactsToStorage($aArgs, &$mResult)
     {
         if (key_exists('FromStorage', $aArgs) && key_exists('ToStorage', $aArgs)) {
-
             $ToAddressBookId = null;
             $ToStorage = $aArgs['ToStorage'];
             $aStorageParts = \explode('-', $aArgs['ToStorage']);
