@@ -370,9 +370,9 @@ class Module extends \Aurora\System\Module\AbstractModule
                         } else {
                             $sUserPrincipalUri = Constants::PRINCIPALS_PREFIX . API::getUserPublicIdById($UserId);
                             $dBPrefix = Api::GetSettings()->DBPrefix;
-                            $stmt = Api::GetPDO()->prepare("select sa.* from ".$dBPrefix."adav_shared_addressbooks sa 
-							left join ".$dBPrefix."adav_addressbooks da on sa.addressbook_id = da.id 
-							right join ".$dBPrefix."contacts_addressbooks ca on da.uri = ca.UUID where ca.Id = ? and sa.principaluri = ?");
+                            $stmt = Api::GetPDO()->prepare("select sa.* from " . $dBPrefix . "adav_shared_addressbooks sa 
+							left join " . $dBPrefix . "adav_addressbooks da on sa.addressbook_id = da.id 
+							right join " . $dBPrefix . "contacts_addressbooks ca on da.uri = ca.UUID where ca.Id = ? and sa.principaluri = ?");
                             $stmt->execute([$oContact->AddressBookId, $sUserPrincipalUri]);
                             $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                             if (is_array($res) && count($res) > 0) {
@@ -591,10 +591,10 @@ class Module extends \Aurora\System\Module\AbstractModule
         $sDavServer = $oDavModule->GetServerUrl();
 
         $mResult['Dav']['Contacts'] = array(
-            'PersonalContactsUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
-            'CollectedAddressesUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
-            'SharedWithAllUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
-            'TeamAddressBookUrl' => $sDavServer.'gab'
+            'PersonalContactsUrl' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
+            'CollectedAddressesUrl' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
+            'SharedWithAllUrl' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
+            'TeamAddressBookUrl' => $sDavServer . 'gab'
         );
     }
 

@@ -407,7 +407,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
                     try {
                         $oVCard = \Sabre\VObject\Reader::read($oItem->get());
                     } catch(\Exception $ex) {
-                        \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+                        \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id=' . $sItemId);
                     }
                     if ($oVCard) {
                         $sFullName = $sFirstName = $sLastName = $sTitle = $sNickName = '';
@@ -491,7 +491,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
                 try {
                     $oVCard = \Sabre\VObject\Reader::read($oItem->get());
                 } catch(\Exception $ex) {
-                    \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+                    \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id=' . $sItemId);
                 }
                 if ($oVCard) {
                     if (isset($oVCard->CATEGORIES)) {
@@ -572,7 +572,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
             try {
                 $oVCard = \Sabre\VObject\Reader::read($oItem->get());
             } catch(\Exception $ex) {
-                \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+                \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id=' . $sItemId);
             }
             if (isset($oVCard)) {
                 $oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
@@ -769,7 +769,7 @@ class Sabredav extends \Aurora\System\Managers\AbstractStorage
             try {
                 $oVCard = \Sabre\VObject\Reader::read($oItem->get());
             } catch(\Exception $ex) {
-                \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id='.$sItemId);
+                \Aurora\System\Api::Log('SABREDAV: Invalid VCard with Id=' . $sItemId);
             }
             if (isset($oVCard)) {
                 $oContactItem = new \Aurora\Modules\Contacts\Classes\ContactListItem();
