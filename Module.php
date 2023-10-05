@@ -591,10 +591,10 @@ class Module extends \Aurora\System\Module\AbstractModule
         $sDavServer = $oDavModule->GetServerUrl();
 
         $mResult['Dav']['Contacts'] = array(
-            'PersonalContactsUrl' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
-            'CollectedAddressesUrl' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
-            'SharedWithAllUrl' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
-            'TeamAddressBookUrl' => $sDavServer . 'gab'
+            'personal' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
+            'collected' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
+            'shared' => $sDavServer . 'addressbooks/' . \Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
+            'team' => $sDavServer . 'gab'
         );
     }
 
