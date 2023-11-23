@@ -78,11 +78,17 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         $sDavServer = $oDavModule->GetServerUrl();
 
-        $mResult['Dav']['Contacts'] = array(
-            'PersonalContactsUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_DEFAULT_NAME,
-            'CollectedAddressesUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_COLLECTED_NAME,
-            'SharedWithAllUrl' => $sDavServer.'addressbooks/'.\Afterlogic\DAV\Constants::ADDRESSBOOK_SHARED_WITH_ALL_NAME,
-            'TeamAddressBookUrl' => $sDavServer.'gab'
-        );
+        $iUserId = \Aurora\System\Api::getAuthenticatedUserId();
+        $aAddressBooks = \Aurora\Modules\Contacts\Module::Decorator()->GetStorages($iUserId);
+
+        $mResult['Dav']['Contacts'] = array();
+        if (is_array($aAddressBooks) && count($aAddressBooks) > 0) {
+            foreach ($aAddressBooks as $oBook) {
+                $mResult['Dav']['Contacts'][] = array(
+                    'Name' => isset($oBook['DisplayName']) ? $oBook['DisplayName'] : '',
+                    'Url' => isset($oBook['Uri']) ? rtrim($sDavServer . $oBook['Uri'], '/') . '/' : ''
+                );
+            }
+        }
     }
 }
