@@ -20,8 +20,6 @@ namespace Aurora\Modules\DavContacts;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
-    public $oManager = null;
-
     protected $aRequireModules = [
         'Contacts'
     ];
