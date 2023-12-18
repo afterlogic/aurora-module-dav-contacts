@@ -55,18 +55,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $this->oModuleSettings;
     }
 
-    /**
-     * @return Manager
-     */
-    public function getManager()
-    {
-        if ($this->oManager === null) {
-            $this->oManager = new Manager($this);
-        }
-
-        return $this->oManager;
-    }
-
     public function init()
     {
         $this->subscribeEvent('MobileSync::GetInfo', array($this, 'onGetMobileSyncInfo'));
