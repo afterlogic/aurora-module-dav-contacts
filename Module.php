@@ -63,9 +63,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $oDavModule = \Aurora\Modules\Dav\Module::Decorator();
 
         $sDavServer = $oDavModule->GetServerUrl();
-
-        $iUserId = \Aurora\System\Api::getAuthenticatedUserId();
-        $aAddressBooks = \Aurora\Modules\Contacts\Module::Decorator()->GetStorages($iUserId);
+        $aAddressBooks = \Aurora\Modules\Contacts\Module::Decorator()->GetStorages();
 
         $mResult['Dav']['Contacts'] = array();
         if (is_array($aAddressBooks) && count($aAddressBooks) > 0) {
