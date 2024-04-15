@@ -70,7 +70,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             foreach ($aAddressBooks as $oBook) {
                 $mResult['Dav']['Contacts'][] = array(
                     'Name' => isset($oBook['DisplayName']) ? $oBook['DisplayName'] : '',
-                    'Url' => isset($oBook['Uri']) ? rtrim($sDavServer . $oBook['Uri'], '/') . '/' : ''
+                    'Url' => isset($oBook['Url']) ? rtrim($sDavServer . $oBook['Url'], '/') . '/' : ''
                 );
             }
         }
